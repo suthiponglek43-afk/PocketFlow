@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#fcf9f8" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <title>The Fluid Ledger - Full Options</title>
+    <title>PocketFlow</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -17,7 +17,7 @@
         theme: {
           extend: {
             colors: {
-              "primary": "#000666", "secondary":  "#006e1c", "surface": "#fcf9f8",
+              "primary": "#000666", "secondary": "#006e1c", "surface": "#fcf9f8",
               "on-surface": "#1c1b1b", "error": "#ba1a1a", "outline-variant": "#c6c5d4",
               "surface-container-lowest": "#ffffff", "secondary-container": "#91f78e",
               "primary-container": "#1a237e", "surface-tint": "#4c56af", "tertiary": "#21005c"
@@ -45,6 +45,14 @@
       .toast-hidden { bottom: -100px; opacity: 0; }
       .toast-visible { bottom: 100px; opacity: 1; }
       .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+      
+      .circular-chart { display: block; margin: 0 auto; max-width: 80%; max-height: 250px; }
+      .circle-bg { fill: none; stroke: #f0edec; stroke-width: 3.8; }
+      .circle { fill: none; stroke-width: 2.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
+      .card-pattern { background-image: radial-gradient(circle at 100% 0%, rgba(255,255,255,0.1) 0%, transparent 40%), radial-gradient(circle at 0% 100%, rgba(0,0,0,0.05) 0%, transparent 40%); }
+      
+      .bar-animate { transform-origin: bottom; animation: barUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+      @keyframes barUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
     </style>
 </head>
 
@@ -54,14 +62,16 @@
     <header class="fixed top-0 w-full z-40 glass-header border-b border-surface-variant/20">
         <div class="max-w-5xl mx-auto flex justify-between items-center px-4 md:px-6 pt-8 md:pt-10 pb-3 md:pb-4 w-full">
             <div class="flex items-center gap-3">
-                <div onclick="resetData()" class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border-2 border-primary-fixed-dim cursor-pointer active:scale-90 transition-all shadow-sm">
-                    <img alt="User" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200" />
-                </div>
-                <h1 id="header-title" class="font-headline font-extrabold text-primary text-xl md:text-2xl tracking-tight">The Fluid Ledger</h1>
+                <h1 id="header-title" class="font-headline font-extrabold text-primary text-xl md:text-2xl tracking-tight">PocketFlow</h1>
             </div>
-            <button onclick="showToast('ไม่มีการแจ้งเตือนใหม่', 'notifications')" class="p-2 rounded-full hover:bg-surface-container active:scale-95 transition-all shrink-0">
-                <span class="material-symbols-outlined text-primary">notifications</span>
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="showToast('ไม่มีการแจ้งเตือนใหม่', 'notifications')" class="p-2 rounded-full hover:bg-surface-container active:scale-95 transition-all shrink-0">
+                    <span class="material-symbols-outlined text-primary text-2xl">notifications</span>
+                </button>
+                <button onclick="resetData()" class="p-2 rounded-full bg-error/10 hover:bg-error/20 active:scale-95 transition-all shrink-0" title="ล้างข้อมูลทั้งหมด">
+                    <span class="material-symbols-outlined text-error text-2xl">delete</span>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -71,706 +81,698 @@
     <main id="view-home" class="view-section active mt-24 md:mt-28 px-4 md:px-6 max-w-5xl mx-auto space-y-6">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div class="lg:col-span-5 space-y-5">
-                <!-- Total Balance -->
-                <section onclick="switchTab('vaults')" class="relative overflow-hidden bg-primary p-6 md:p-8 rounded-[2.5rem] text-white shadow-2xl cursor-pointer active:scale-[0.98] transition-all">
+                <section onclick="switchTab('vaults')" class="relative overflow-hidden bg-primary p-6 rounded-2xl text-white shadow-xl cursor-pointer active:scale-[0.98] transition-all">
                     <div class="relative z-10 space-y-1">
-                        <div class="flex justify-between items-center opacity-60">
+                        <div class="flex justify-between items-center opacity-80">
                             <p class="text-[10px] md:text-xs uppercase tracking-widest font-bold">สินทรัพย์สุทธิรวม</p>
                             <span class="material-symbols-outlined text-sm">chevron_right</span>
                         </div>
                         <h2 id="home-total-balance" class="font-headline font-bold text-3xl md:text-4xl tracking-tighter">฿ 0.00</h2>
                     </div>
-                    <div class="mt-8 grid grid-cols-2 gap-4 relative z-10">
-                        <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-2xl">
-                            <p class="text-[9px] uppercase text-white/50 mb-1 font-bold">รับเดือนนี้</p>
-                            <p id="home-total-income" class="font-headline font-bold text-base">฿ 0</p>
+                    <div class="mt-8 grid grid-cols-2 gap-3 relative z-10">
+                        <div class="bg-white/15 backdrop-blur-md p-3.5 rounded-2xl border border-white/10">
+                            <p class="text-[9px] uppercase text-white/70 mb-1 font-bold">รับเดือนนี้</p>
+                            <p id="home-total-income" class="font-headline font-bold text-base md:text-lg">฿ 0</p>
                         </div>
-                        <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-2xl">
-                            <p class="text-[9px] uppercase text-white/50 mb-1 font-bold">จ่ายเดือนนี้</p>
-                            <p id="home-total-expense" class="font-headline font-bold text-base">฿ 0</p>
+                        <div class="bg-white/15 backdrop-blur-md p-3.5 rounded-2xl border border-white/10">
+                            <p class="text-[9px] uppercase text-white/70 mb-1 font-bold">จ่ายเดือนนี้</p>
+                            <p id="home-total-expense" class="font-headline font-bold text-base md:text-lg">฿ 0</p>
                         </div>
                     </div>
                     <div class="absolute -top-12 -right-12 w-40 h-40 bg-primary-container rounded-full blur-3xl opacity-40"></div>
                 </section>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="openTransactionModal('income')" class="bg-secondary-container text-on-secondary-container py-4 rounded-full font-headline font-bold text-xs active:scale-95 shadow-sm hover:brightness-105 transition-all">รับเงิน</button>
-                    <button onclick="openTransactionModal('expense')" class="bg-surface-container-high text-on-surface py-4 rounded-full font-headline font-bold text-xs active:scale-95 shadow-sm hover:bg-surface-variant transition-all">จ่ายเงิน</button>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="openTransactionModal('income')" class="bg-surface-container-lowest border border-outline-variant/20 py-4 rounded-2xl font-headline font-bold text-xs active:scale-95 shadow-sm hover:border-secondary transition-all flex flex-col items-center justify-center gap-2 group">
+                        <div class="w-8 h-8 rounded-full bg-secondary/10 text-secondary flex items-center justify-center group-hover:scale-110 transition-transform"><span class="material-symbols-outlined text-[18px]">south_west</span></div>
+                        <span class="text-secondary">รายรับ</span>
+                    </button>
+                    <button onclick="openTransactionModal('expense')" class="bg-surface-container-lowest border border-outline-variant/20 py-4 rounded-2xl font-headline font-bold text-xs active:scale-95 shadow-sm hover:border-error transition-all flex flex-col items-center justify-center gap-2 group">
+                        <div class="w-8 h-8 rounded-full bg-error/10 text-error flex items-center justify-center group-hover:scale-110 transition-transform"><span class="material-symbols-outlined text-[18px]">north_east</span></div>
+                        <span class="text-error">รายจ่าย</span>
+                    </button>
+                    <button onclick="openTransactionModal('transfer')" class="bg-surface-container-lowest border border-outline-variant/20 py-4 rounded-2xl font-headline font-bold text-xs active:scale-95 shadow-sm hover:border-primary transition-all flex flex-col items-center justify-center gap-2 group">
+                        <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform"><span class="material-symbols-outlined text-[18px]">sync_alt</span></div>
+                        <span class="text-primary">โอน</span>
+                    </button>
                 </div>
             </div>
 
             <div class="lg:col-span-7 space-y-6">
-                <!-- Budget Overview -->
-                <section class="bg-surface-container-lowest p-6 rounded-[2rem] shadow-sm border border-outline-variant/10 cursor-pointer hover:shadow-md transition-all" onclick="switchTab('budget')">
+                <section class="bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-outline-variant/20 cursor-pointer hover:shadow-md transition-all" onclick="switchTab('budget')">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-headline font-bold text-primary text-base">งบประมาณเดือนนี้</h3>
-                        <span id="home-budget-pct" class="text-[10px] font-bold text-secondary bg-secondary/10 px-2.5 py-1 rounded-full">0%</span>
+                        <h3 class="font-headline font-bold text-primary text-sm flex items-center gap-2"><span class="material-symbols-outlined text-lg">donut_small</span> ภาพรวมงบประมาณ</h3>
+                        <span id="home-budget-pct" class="text-[10px] font-bold text-secondary bg-secondary/10 px-2 py-0.5 rounded-md">0%</span>
                     </div>
                     <div class="mb-3 flex justify-between items-end">
-                        <span class="font-headline font-extrabold text-2xl text-primary truncate">
+                        <span class="font-headline font-bold text-xl text-primary truncate">
                             <span id="home-budget-spent">฿ 0</span> 
-                            <span class="text-sm text-on-surface-variant/30">/ <span id="home-budget-limit">฿ 0</span></span>
+                            <span class="text-xs text-on-surface-variant/40">/ <span id="home-budget-limit">฿ 0</span></span>
                         </span>
-                        <span id="home-budget-remain" class="text-[11px] font-bold text-on-surface-variant/60 uppercase whitespace-nowrap">เหลือ ฿ 0</span>
+                        <span id="home-budget-remain" class="text-[10px] font-bold text-on-surface-variant/60 uppercase whitespace-nowrap">เหลือ ฿ 0</span>
                     </div>
-                    <div class="w-full h-2.5 bg-surface-container-high rounded-full overflow-hidden">
+                    <div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
                         <div id="home-budget-bar" class="h-full bg-gradient-to-r from-primary to-surface-tint w-0 transition-all duration-1000"></div>
                     </div>
                 </section>
 
-                <!-- Savings Goals -->
                 <section>
                     <div class="flex justify-between items-center mb-3 px-1">
-                        <h3 class="font-headline font-bold text-primary text-base">เป้าหมายเก็บเงิน</h3>
-                        <button onclick="openViewAllGoalsModal()" class="text-[11px] text-primary font-bold hover:underline p-1">ดูทั้งหมด</button>
+                        <h3 class="font-headline font-bold text-primary text-sm">เป้าหมายเก็บเงิน</h3>
+                        <button onclick="switchTab('home')" class="text-[10px] text-primary font-bold hover:underline py-1">ดูทั้งหมด</button>
                     </div>
-                    <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-3 px-1" id="home-goals-container">
-                        <button id="btn-add-goal-home" onclick="openAddGoalModal()" class="w-[75vw] max-w-[260px] bg-surface-container-lowest/50 p-6 rounded-[2rem] border-2 border-dashed border-outline-variant/30 flex flex-col items-center justify-center gap-2 shrink-0 active:scale-95 transition-all">
-                            <span class="material-symbols-outlined text-primary text-2xl">add</span>
-                            <span class="text-primary font-bold text-xs">เพิ่มเป้าหมายใหม่</span>
+                    <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2 px-1" id="home-goals-container">
+                        <button id="btn-add-goal-home" onclick="openAddGoalModal()" class="w-[65vw] max-w-[200px] bg-surface-container-lowest p-4 rounded-2xl border-2 border-dashed border-outline-variant/30 flex flex-col items-center justify-center gap-2 shrink-0 active:scale-95 transition-all hover:bg-surface-container-lowest hover:border-primary/50 min-h-[100px] group">
+                            <span class="material-symbols-outlined text-primary text-xl group-hover:scale-110 transition-transform">add_circle</span>
+                            <span class="text-primary font-bold text-[10px]">เพิ่มเป้าหมายใหม่</span>
                         </button>
                     </div>
                 </section>
 
-                <!-- History -->
-                <section class="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/10 shadow-sm">
-                    <h3 class="font-headline font-bold text-primary text-base mb-5 flex items-center gap-2"><span class="material-symbols-outlined text-primary text-lg">history</span> ประวัติล่าสุด</h3>
-                    <div id="home-history-list" class="space-y-4">
-                        <!-- History via JS -->
+                <section>
+                    <div class="flex justify-between items-center mb-3 px-1">
+                        <h3 class="font-headline font-bold text-primary text-sm flex items-center gap-2">รายการล่าสุด</h3>
+                        <span class="text-[9px] text-outline italic">แตะเพื่อแก้ไข</span>
                     </div>
+                    <div id="home-history-list" class="space-y-2"></div>
                 </section>
             </div>
         </div>
     </main>
 
     <!-- 2. ANALYTICS VIEW -->
-    <main id="view-analytics" class="view-section pt-28 px-4 md:px-6 max-w-5xl mx-auto space-y-6 pb-20">
-        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <h2 class="font-headline font-bold text-2xl md:text-4xl text-primary tracking-tight">วิเคราะห์ข้อมูล</h2>
-            <div class="flex bg-surface-container-low p-1 rounded-full w-fit border border-outline-variant/10">
-                <button onclick="toggleAnalytics(this, 'month')" class="px-6 py-2 bg-white rounded-full text-primary font-bold shadow-sm text-xs transition-all">รายเดือน</button>
-                <button onclick="toggleAnalytics(this, 'year')" class="px-6 py-2 text-on-surface-variant font-medium text-xs opacity-60 transition-all rounded-full">รายปี</button>
+    <main id="view-analytics" class="view-section pt-28 px-4 md:px-6 max-w-5xl mx-auto space-y-5 pb-20">
+        <h2 class="font-headline font-bold text-xl md:text-2xl text-primary tracking-tight px-1">วิเคราะห์ข้อมูล</h2>
+
+        <div class="flex bg-surface-container-high p-1 rounded-xl w-fit mx-auto shadow-sm">
+            <button onclick="changeHomePeriod('week')" id="period-week" class="px-6 py-1.5 rounded-lg text-xs font-bold transition-all text-on-surface-variant">สัปดาห์</button>
+            <button onclick="changeHomePeriod('month')" id="period-month" class="px-6 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-primary shadow-sm">เดือน</button>
+            <button onclick="changeHomePeriod('year')" id="period-year" class="px-6 py-1.5 rounded-lg text-xs font-bold transition-all text-on-surface-variant">ปี</button>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-3">
+            <div class="p-3 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-sm text-center">
+                <p class="text-[8px] font-bold text-outline uppercase mb-1">สัปดาห์นี้</p>
+                <p id="ana-summary-week" class="text-xs font-black text-primary">฿0</p>
+            </div>
+            <div class="p-3 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-sm text-center">
+                <p class="text-[8px] font-bold text-outline uppercase mb-1">เดือนนี้</p>
+                <p id="ana-summary-month" class="text-xs font-black text-primary">฿0</p>
+            </div>
+            <div class="p-3 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-sm text-center">
+                <p class="text-[8px] font-bold text-outline uppercase mb-1">ปีนี้</p>
+                <p id="ana-summary-year" class="text-xs font-black text-primary">฿0</p>
             </div>
         </div>
 
-        <!-- AI Insight -->
-        <div class="p-6 md:p-8 rounded-[2.5rem] bg-primary relative overflow-hidden flex flex-col md:flex-row items-center gap-6 shadow-xl cursor-pointer hover:shadow-primary/40 transition-shadow" onclick="showToast('ดูคำแนะนำเจาะลึก', 'auto_awesome')">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-primary-container/30 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
-            <div class="relative z-10 w-14 h-14 rounded-2xl bg-secondary-container flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(145,247,142,0.4)]">
-                <span class="material-symbols-outlined text-on-secondary-container text-3xl">auto_awesome</span>
+        <div class="p-5 rounded-3xl bg-surface-container-lowest border border-outline-variant/20 shadow-sm space-y-6">
+            <h3 class="font-headline font-bold text-sm text-primary flex items-center gap-2"><span class="material-symbols-outlined text-primary text-lg">bar_chart</span> เปรียบเทียบรายรับ-รายจ่าย</h3>
+            
+            <div class="overflow-x-auto hide-scrollbar pb-4">
+                <div id="analytics-comparison-container" class="flex items-end gap-6 h-64 min-w-max px-4 pb-2 border-b border-surface-variant/20"></div>
             </div>
-            <div class="relative z-10 space-y-2 text-center md:text-left">
-                <h3 class="font-headline font-bold text-white text-lg">AI Financial Insight</h3>
-                <p class="text-white/80 font-body leading-relaxed text-sm">
-                    คุณมีการใช้จ่ายในหมวด <span class="text-secondary-container font-bold underline">ช้อปปิ้ง</span> ลดลง 15% จากเดือนที่แล้ว ยอดเยี่ยมมาก! ลองนำส่วนต่าง <span class="text-secondary-container font-bold">฿ 2,400</span> โอนเข้าบัญชีลงทุนเพื่อต่อยอดความมั่งคั่ง
-                </p>
+            
+            <div class="flex justify-center gap-8 text-[10px] font-bold">
+                <div class="flex items-center gap-2"><span class="w-3 h-3 bg-secondary rounded-sm"></span> รายรับ</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 bg-error rounded-sm"></span> รายจ่าย</div>
+            </div>
+
+            <div id="comparison-stats" class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2"></div>
+        </div>
+
+        <div class="p-5 md:p-6 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 shadow-sm flex flex-col md:flex-row items-center gap-6">
+            <div class="relative w-40 h-40 shrink-0" id="analytics-chart-container"></div>
+            <div class="flex-1 w-full">
+                <h3 class="font-headline font-bold text-sm text-primary mb-3 border-b border-surface-variant/50 pb-2">สัดส่วนตามหมวดหมู่</h3>
+                <div class="grid grid-cols-1 gap-2" id="analytics-legend-list"></div>
             </div>
         </div>
 
-        <!-- Comparison Bar Chart Side-by-Side -->
-        <div class="p-6 rounded-[2rem] bg-surface-container-lowest border border-outline-variant/10 shadow-sm space-y-8">
-            <div class="flex items-center justify-between">
-                <h3 class="font-headline font-bold text-lg md:text-xl text-primary tracking-tight">เปรียบเทียบ รับ-จ่าย</h3>
-                <div class="flex gap-4">
-                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-secondary"></span><span class="text-[10px] font-bold uppercase text-secondary">รายรับ</span></div>
-                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-error"></span><span class="text-[10px] font-bold uppercase text-error">รายจ่าย</span></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/20 space-y-4">
+                <h3 class="font-headline font-bold text-sm text-primary flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-lg">shield_with_heart</span> สถานะเงินสำรอง</h3>
+                <div class="grid grid-cols-2 gap-3 bg-surface-container-low p-3 rounded-xl border border-outline-variant/5">
+                    <div><p class="text-[9px] text-on-surface-variant font-bold uppercase opacity-70">เป้าหมาย (6 เดือน)</p><p id="ana-ef-target" class="font-headline font-bold text-base text-primary mt-0.5">฿ 0</p></div>
+                    <div class="text-right"><p class="text-[9px] text-on-surface-variant font-bold uppercase opacity-70">สะสมปัจจุบัน</p><p id="ana-ef-total" class="font-headline font-bold text-base text-secondary mt-0.5">฿ 0</p></div>
+                </div>
+                <div class="space-y-1.5 px-1">
+                    <div class="flex justify-between text-[10px] font-bold"><span class="text-on-surface-variant">ความคืบหน้า</span><span id="ana-ef-pct" class="text-secondary">0%</span></div>
+                    <div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden"><div id="ana-ef-bar" class="h-full bg-gradient-to-r from-secondary to-secondary-fixed w-0 transition-all duration-1000"></div></div>
                 </div>
             </div>
-            <!-- Bar Chart Mockup -->
-            <div class="h-48 md:h-64 flex items-end justify-between gap-1 border-b border-surface-variant pb-2">
-                <div class="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
-                    <div class="w-full flex items-end justify-center gap-1 h-full px-1">
-                        <div class="w-1/2 bg-secondary/80 rounded-t-lg h-[60%] transition-all group-hover:bg-secondary"></div>
-                        <div class="w-1/2 bg-error/80 rounded-t-lg h-[40%] transition-all group-hover:bg-error"></div>
-                    </div>
-                    <span class="text-[9px] font-bold opacity-40 uppercase mt-2">มี.ค.</span>
-                </div>
-                <div class="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
-                    <div class="w-full flex items-end justify-center gap-1 h-full px-1">
-                        <div class="w-1/2 bg-secondary/80 rounded-t-lg h-[80%] transition-all group-hover:bg-secondary"></div>
-                        <div class="w-1/2 bg-error/80 rounded-t-lg h-[65%] transition-all group-hover:bg-error"></div>
-                    </div>
-                    <span class="text-[9px] font-bold opacity-40 uppercase mt-2">เม.ย.</span>
-                </div>
-                <div class="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
-                    <div class="w-full flex items-end justify-center gap-1 h-full px-1">
-                        <div class="w-1/2 bg-secondary rounded-t-lg h-[95%] relative">
-                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-secondary text-white text-[8px] px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">฿32k</div>
-                        </div>
-                        <div class="w-1/2 bg-error rounded-t-lg h-[70%] relative">
-                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-error text-white text-[8px] px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">฿24k</div>
-                        </div>
-                    </div>
-                    <span class="text-[9px] font-bold text-primary uppercase mt-2">ปัจจุบัน</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Grid: Emergency Fund & Heatmap -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Emergency Fund Analysis -->
-            <div class="p-6 rounded-[2rem] bg-surface-container-low shadow-sm border border-outline-variant/10 space-y-6">
-                <h3 class="font-headline font-bold text-lg text-primary flex items-center gap-2"><span class="material-symbols-outlined text-secondary">shield_with_heart</span> วิเคราะห์เงินสำรองฉุกเฉิน</h3>
-                <div class="grid grid-cols-2 gap-3 bg-surface-container-lowest p-4 rounded-3xl">
-                    <div><p class="text-[10px] text-on-surface-variant font-bold uppercase opacity-60">สำรองขั้นต่ำ (6 เดือน)</p><p class="font-headline font-bold text-xl text-primary mt-1">฿ 104,400</p></div>
-                    <div class="md:text-right border-t border-outline-variant/10 md:border-none pt-4 md:pt-0"><p class="text-[10px] text-on-surface-variant font-bold uppercase opacity-60">ยอดสะสมจริง</p><p id="ana-ef-total" class="font-headline font-bold text-xl text-secondary mt-1">฿ 0</p></div>
-                </div>
-                <div class="space-y-2.5 px-1">
-                    <div class="flex justify-between text-xs font-bold"><span class="text-on-surface-variant">ความคืบหน้าการออม</span><span id="ana-ef-pct" class="text-secondary">0%</span></div>
-                    <div class="w-full h-3 bg-surface-container-high rounded-full overflow-hidden">
-                        <div id="ana-ef-bar" class="h-full bg-gradient-to-r from-secondary to-secondary-fixed w-0 transition-all duration-1000"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spending Density Map -->
-            <div class="p-6 rounded-[2rem] bg-surface-container-lowest border border-outline-variant/10 shadow-sm">
-                <h3 class="font-headline font-bold text-base text-primary mb-6 flex items-center gap-2"><span class="material-symbols-outlined text-primary">calendar_month</span> ความถี่การใช้งาน</h3>
+            <div class="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 shadow-sm">
+                <h3 class="font-headline font-bold text-sm text-primary mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-primary text-lg">calendar_month</span> ความถี่การทำรายการ</h3>
                 <div class="flex flex-wrap gap-1.5 justify-center" id="density-map"></div>
-                <div class="mt-5 flex justify-between text-[9px] font-bold text-outline uppercase tracking-widest px-2 opacity-50"><span>น้อย</span><span>มาก</span></div>
+                <div class="mt-4 flex justify-between text-[9px] font-bold text-outline uppercase tracking-widest px-2 opacity-50"><span>น้อย</span><span>มาก</span></div>
             </div>
         </div>
     </main>
 
-    <!-- 3. BUDGET VIEW -->
-    <main id="view-budget" class="view-section pt-28 px-4 md:px-6 max-w-5xl mx-auto pb-24">
-        <h2 class="font-headline font-bold text-2xl md:text-4xl text-primary mb-6">จัดการงบประมาณ</h2>
-        <div id="budget-categories-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+    <!-- 3. BUDGET & BILLS VIEW -->
+    <main id="view-budget" class="view-section pt-28 px-4 md:px-6 max-w-5xl mx-auto pb-24 space-y-6">
+        <section>
+            <div class="flex justify-between items-center mb-3 px-1">
+                <h2 class="font-headline font-bold text-lg text-primary flex items-center gap-2"><span class="material-symbols-outlined text-primary text-lg">receipt_long</span> บิลประจำเดือน</h2>
+                <button onclick="openAddBillModal()" class="text-[9px] font-bold bg-primary/10 text-primary px-3 py-1.5 rounded-full hover:bg-primary/20 transition-all shadow-sm">+ เพิ่มบิล</button>
+            </div>
+            <div id="bills-list" class="space-y-2"></div>
+        </section>
+        <section>
+            <h2 class="font-headline font-bold text-lg text-primary mb-3 px-1">จัดการงบประมาณ</h2>
+            <div id="budget-categories-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        </section>
     </main>
 
     <!-- 4. VAULTS VIEW -->
     <main id="view-vaults" class="view-section pt-28 px-4 md:px-6 max-w-5xl mx-auto pb-24">
-        <div class="mb-10">
-            <p class="text-xs uppercase text-on-surface-variant font-bold tracking-widest mb-1.5 opacity-60 uppercase">Net Worth รวม</p>
-            <h2 id="vault-networth-display" class="font-headline font-extrabold text-4xl sm:text-6xl text-primary tracking-tighter">฿ 0.00</h2>
+        <div class="mb-8 px-1 flex justify-between items-end">
+            <div>
+                <p class="text-[10px] uppercase text-on-surface-variant font-bold tracking-widest mb-1 opacity-70">สินทรัพย์สุทธิรวม</p>
+                <h2 id="vault-networth-display" class="font-headline font-extrabold text-3xl sm:text-5xl text-primary tracking-tight">฿ 0.00</h2>
+            </div>
+            <button onclick="openAddAccountModal()" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg active:scale-90 transition-all mb-1"><span class="material-symbols-outlined">add</span></button>
         </div>
-        <button onclick="openAddAccountModal()" class="w-full bg-primary text-white py-5 rounded-full font-headline font-bold shadow-xl active:scale-95 transition-all mb-10">เพิ่มบัญชีใหม่</button>
         
-        <h4 class="font-headline font-bold text-sm text-on-surface-variant uppercase mb-5 flex items-center gap-2 px-1 tracking-widest opacity-80"><span class="material-symbols-outlined text-lg">account_balance</span> บัญชีเงินฝาก & เงินสด</h4>
-        <div id="vault-bank-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12"></div>
-
-        <h4 class="font-headline font-bold text-sm text-on-surface-variant uppercase mb-5 flex items-center gap-2 px-1 tracking-widest opacity-80"><span class="material-symbols-outlined text-lg">credit_card</span> บัตรเครดิต & หนี้สิน</h4>
-        <div id="vault-card-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <h4 class="font-headline font-bold text-xs text-on-surface-variant uppercase mb-3 flex items-center gap-1.5 px-1 tracking-widest opacity-80"><span class="material-symbols-outlined text-base">account_balance</span> เงินฝาก & เงินสด</h4>
+        <div id="vault-bank-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8"></div>
+        <h4 class="font-headline font-bold text-xs text-on-surface-variant uppercase mb-3 flex items-center gap-1.5 px-1 tracking-widest opacity-80"><span class="material-symbols-outlined text-base">language</span> Travel Cards</h4>
+        <div id="vault-travel-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8"></div>
+        <h4 class="font-headline font-bold text-xs text-on-surface-variant uppercase mb-3 flex items-center gap-1.5 px-1 tracking-widest opacity-80"><span class="material-symbols-outlined text-base">credit_card</span> บัตรเครดิต & หนี้สิน</h4>
+        <div id="vault-card-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8"></div>
+        <h4 class="font-headline font-bold text-xs text-on-surface-variant uppercase mb-3 flex items-center gap-1.5 px-1 tracking-widest opacity-80"><span class="material-symbols-outlined text-base">trending_up</span> พอร์ตการลงทุน</h4>
+        <div id="vault-invest-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8"></div>
     </main>
 
-    <!-- Navigation Bar -->
+    <!-- Navigation -->
     <nav class="fixed bottom-0 left-0 w-full z-30 bg-[#fcf9f8]/95 backdrop-blur-3xl border-t border-surface-variant/20 shadow-[0_-8px_32px_0_rgba(28,27,27,0.06)] pb-safe">
         <div class="max-w-5xl mx-auto flex justify-between items-end px-2 pb-6 h-[88px]">
-            <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 flex flex-col items-center justify-center text-primary font-bold transition-all">
-                <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">home</span>
-                <span class="text-[9px] uppercase mt-1.5 font-bold tracking-wider">หน้าหลัก</span>
-            </button>
-            <button onclick="switchTab('analytics')" id="nav-analytics" class="nav-btn flex-1 flex flex-col items-center justify-center text-on-surface-variant/50 transition-all">
-                <span class="material-symbols-outlined text-[24px]">insights</span>
-                <span class="text-[9px] uppercase mt-1.5 font-bold tracking-wider">วิเคราะห์</span>
-            </button>
-            <div class="w-16 flex justify-center shrink-0 relative -top-4">
-                <button onclick="openTransactionModal('expense')" class="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white shadow-lg active:scale-90 transition-all"><span class="material-symbols-outlined text-3xl">add</span></button>
-            </div>
-            <button onclick="switchTab('budget')" id="nav-budget" class="nav-btn flex-1 flex flex-col items-center justify-center text-on-surface-variant/50 transition-all">
-                <span class="material-symbols-outlined text-[24px]">donut_small</span>
-                <span class="text-[9px] uppercase mt-1.5 font-bold tracking-wider">งบประมาณ</span>
-            </button>
-            <button onclick="switchTab('vaults')" id="nav-vaults" class="nav-btn flex-1 flex flex-col items-center justify-center text-on-surface-variant/50 transition-all">
-                <span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
-                <span class="text-[9px] uppercase mt-1.5 font-bold tracking-wider">บัญชี</span>
-            </button>
+            <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 flex flex-col items-center justify-center text-primary font-bold transition-all"><span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">home</span><span class="text-[9px] uppercase mt-1.5 font-bold tracking-wider">หน้าหลัก</span></button>
+            <button onclick="switchTab('analytics')" id="nav-analytics" class="nav-btn flex-1 flex flex-col items-center justify-center text-on-surface-variant/50 transition-all"><span class="material-symbols-outlined text-[24px]">insights</span><span class="text-[9px] uppercase mt-1.5 font-bold tracking-wider">วิเคราะห์</span></button>
+            <div class="w-16 flex justify-center shrink-0 relative -top-4"><button onclick="openTransactionModal('expense')" class="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-white shadow-lg shadow-primary/30 active:scale-90 transition-all"><span class="material-symbols-outlined text-3xl">add</span></button></div>
+            <button onclick="switchTab('budget')" id="nav-budget" class="nav-btn flex-1 flex flex-col items-center justify-center text-on-surface-variant/50 transition-all"><span class="material-symbols-outlined text-[24px]">donut_small</span><span class="text-[9px] uppercase mt-1.5 font-bold tracking-wider">งบ & บิล</span></button>
+            <button onclick="switchTab('vaults')" id="nav-vaults" class="nav-btn flex-1 flex flex-col items-center justify-center text-on-surface-variant/50 transition-all"><span class="material-symbols-outlined text-[24px]">account_balance_wallet</span><span class="text-[9px] uppercase mt-1.5 font-bold tracking-wider">บัญชี</span></button>
         </div>
     </nav>
 
-    <!-- ================= MODALS SECTION ================= -->
-    <!-- Modal: Add Goal -->
-    <div id="modal-add-goal" class="fixed inset-0 z-50 modal-hidden bg-on-surface/50 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300">
-        <div class="modal-content-anim bg-surface w-full max-w-md rounded-[2.5rem] shadow-2xl flex flex-col max-h-[90vh]">
-            <header class="p-6 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
-                <h2 class="font-headline font-bold text-xl text-primary">สร้างเป้าหมายใหม่</h2>
-                <button onclick="closeModal('modal-add-goal')" class="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined">close</span></button>
-            </header>
-            <div class="p-6 space-y-6 overflow-y-auto hide-scrollbar flex-1">
-                <input id="new-goal-name" class="w-full bg-surface-container-low border-none rounded-2xl p-5 font-headline text-lg text-primary focus:ring-2 focus:ring-primary" placeholder="ชื่อเป้าหมาย (เช่น ซื้อรถ)" />
-                <input id="new-goal-target" class="w-full bg-surface-container-low border-none rounded-2xl p-5 font-headline text-lg text-primary focus:ring-2 focus:ring-primary" placeholder="ยอดเป้าหมาย (฿)" type="number" />
-                <div>
-                    <label class="text-[10px] font-bold uppercase text-outline mb-3 block px-1 tracking-widest">เลือกไอคอน</label>
-                    <div class="grid grid-cols-5 gap-2" id="goal-icon-grid">
-                        <button onclick="selectGoalIcon(this)" class="p-3 rounded-2xl border-2 border-primary bg-primary/5 text-primary ring-primary transition-all"><span class="material-symbols-outlined">flight_takeoff</span></button>
-                        <button onclick="selectGoalIcon(this)" class="p-3 rounded-2xl border-2 border-transparent bg-surface-container text-on-surface-variant transition-all"><span class="material-symbols-outlined">directions_car</span></button>
-                        <button onclick="selectGoalIcon(this)" class="p-3 rounded-2xl border-2 border-transparent bg-surface-container text-on-surface-variant transition-all"><span class="material-symbols-outlined">laptop_mac</span></button>
-                        <button onclick="selectGoalIcon(this)" class="p-3 rounded-2xl border-2 border-transparent bg-surface-container text-on-surface-variant transition-all"><span class="material-symbols-outlined">home</span></button>
-                        <button onclick="selectGoalIcon(this)" class="p-3 rounded-2xl border-2 border-transparent bg-surface-container text-on-surface-variant transition-all"><span class="material-symbols-outlined">favorite</span></button>
-                    </div>
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold uppercase text-outline mb-3 block px-1 tracking-widest">ผูกกับบัญชีเงินเก็บ</label>
-                    <div id="goal-account-list" class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar"></div>
-                </div>
-            </div>
-            <div class="p-6 border-t border-outline-variant/10 shrink-0"><button onclick="saveAddGoal()" class="w-full bg-primary text-white py-5 rounded-full font-headline font-bold shadow-lg active:scale-95 transition-all">บันทึกเป้าหมาย</button></div>
-        </div>
-    </div>
-
-    <!-- Modal: View All Goals -->
-    <div id="modal-view-all-goals" class="fixed inset-0 z-50 modal-hidden bg-on-surface/50 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300">
-        <div class="modal-content-anim bg-surface w-full max-w-xl rounded-[2.5rem] shadow-2xl flex flex-col max-h-[85vh]">
-            <header class="p-6 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
-                <h2 class="font-headline font-bold text-xl text-primary">เป้าหมายทั้งหมด</h2>
-                <button onclick="closeModal('modal-view-all-goals')" class="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined">close</span></button>
-            </header>
-            <div id="all-goals-list" class="p-6 space-y-4 overflow-y-auto hide-scrollbar flex-1"></div>
-            <div class="p-6 border-t border-outline-variant/10 shrink-0"><button onclick="closeModal('modal-view-all-goals'); openAddGoalModal();" class="w-full border-2 border-dashed border-primary/30 text-primary py-4 rounded-2xl font-bold hover:bg-primary/5 active:scale-95 transition-all">+ สร้างเป้าหมายใหม่</button></div>
-        </div>
-    </div>
-
-    <!-- Modal: Add Account (With Full Thai Banks) -->
-    <div id="modal-add-account" class="fixed inset-0 z-50 modal-hidden bg-on-surface/50 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300">
-        <div class="modal-content-anim bg-surface w-full max-w-md rounded-[2.5rem] shadow-2xl flex flex-col max-h-[90vh]">
-            <header class="p-6 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
-                <h2 class="font-manrope font-bold text-xl text-primary">เพิ่มบัญชีใหม่</h2>
-                <button onclick="closeModal('modal-add-account')" class="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined">close</span></button>
-            </header>
-            <div class="p-6 space-y-6 overflow-y-auto hide-scrollbar flex-1">
-                <div class="grid grid-cols-2 gap-2" id="account-type-grid">
-                    <button onclick="selectAccountType(this, 'bank')" class="p-3 rounded-2xl border-2 border-primary bg-primary/5 text-primary text-xs font-bold ring-primary transition-all">เงินฝาก/เงินสด</button>
-                    <button onclick="selectAccountType(this, 'card')" class="p-3 rounded-2xl border-2 border-transparent bg-surface-container text-on-surface-variant text-xs font-bold transition-all">บัตรเครดิต</button>
-                </div>
-                
-                <div>
-                    <label class="text-[10px] font-bold uppercase text-outline mb-3 block px-1 tracking-widest">ผู้ให้บริการ</label>
-                    <div id="provider-grid" class="grid grid-cols-4 gap-2">
-                        <button onclick="selectBank(this, 'KBank', 'savings', '#00A950')" class="provider-btn flex flex-col items-center gap-1.5 p-2 rounded-xl border border-outline-variant/20 hover:bg-surface-variant transition-all"><div class="w-8 h-8 rounded-full bg-[#00A950] flex items-center justify-center text-white shadow-sm"><span class="material-symbols-outlined text-base">savings</span></div><span class="text-[8px] font-bold">KBank</span></button>
-                        <button onclick="selectBank(this, 'SCB', 'account_balance_wallet', '#4E2A84')" class="provider-btn flex flex-col items-center gap-1.5 p-2 rounded-xl border border-outline-variant/20 hover:bg-surface-variant transition-all"><div class="w-8 h-8 rounded-full bg-[#4E2A84] flex items-center justify-center text-white shadow-sm"><span class="material-symbols-outlined text-base">account_balance_wallet</span></div><span class="text-[8px] font-bold">SCB</span></button>
-                        <button onclick="selectBank(this, 'BBL', 'account_balance', '#1E4598')" class="provider-btn flex flex-col items-center gap-1.5 p-2 rounded-xl border border-outline-variant/20 hover:bg-surface-variant transition-all"><div class="w-8 h-8 rounded-full bg-[#1E4598] flex items-center justify-center text-white shadow-sm"><span class="material-symbols-outlined text-base">account_balance</span></div><span class="text-[8px] font-bold">BBL</span></button>
-                        <button onclick="selectBank(this, 'Krungsri', 'wallet', '#FEC43B')" class="provider-btn flex flex-col items-center gap-1.5 p-2 rounded-xl border border-outline-variant/20 hover:bg-surface-variant transition-all"><div class="w-8 h-8 rounded-full bg-[#FEC43B] flex items-center justify-center text-[#D99A00] shadow-sm"><span class="material-symbols-outlined text-base">wallet</span></div><span class="text-[8px] font-bold">BAY</span></button>
-                        <button onclick="selectBank(this, 'KTB', 'account_balance', '#00AEEF')" class="provider-btn flex flex-col items-center gap-1.5 p-2 rounded-xl border border-outline-variant/20 hover:bg-surface-variant transition-all"><div class="w-8 h-8 rounded-full bg-[#00AEEF] flex items-center justify-center text-white shadow-sm"><span class="material-symbols-outlined text-base">account_balance</span></div><span class="text-[8px] font-bold">KTB</span></button>
-                        <button onclick="selectBank(this, 'ttb', 'account_balance', '#0050F0')" class="provider-btn flex flex-col items-center gap-1.5 p-2 rounded-xl border border-outline-variant/20 hover:bg-surface-variant transition-all"><div class="w-8 h-8 rounded-full bg-[#0050F0] flex items-center justify-center text-white shadow-sm"><span class="material-symbols-outlined text-base">account_balance</span></div><span class="text-[8px] font-bold">ttb</span></button>
-                        <button onclick="selectBank(this, 'GSB', 'savings', '#EB198C')" class="provider-btn flex flex-col items-center gap-1.5 p-2 rounded-xl border border-outline-variant/20 hover:bg-surface-variant transition-all"><div class="w-8 h-8 rounded-full bg-[#EB198C] flex items-center justify-center text-white shadow-sm"><span class="material-symbols-outlined text-base">savings</span></div><span class="text-[8px] font-bold">GSB</span></button>
-                        <button onclick="selectBank(this, 'เงินสด', 'payments', '#10B981')" class="provider-btn flex flex-col items-center gap-1.5 p-2 rounded-xl border border-outline-variant/20 hover:bg-surface-variant transition-all"><div class="w-8 h-8 rounded-full bg-[#10B981] flex items-center justify-center text-white shadow-sm"><span class="material-symbols-outlined text-base">payments</span></div><span class="text-[8px] font-bold">เงินสด</span></button>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <input id="new-account-name" class="w-full bg-surface-container-low border-none rounded-2xl p-5 font-headline text-primary focus:ring-2 focus:ring-primary" placeholder="ชื่อบัญชี (เช่น เงินเดือน)" />
-                    <input id="new-account-balance" oninput="calculateReserveHint()" class="w-full bg-surface-container-low border-none rounded-2xl p-5 font-headline text-primary focus:ring-2 focus:ring-primary" placeholder="ยอดเริ่มต้น (฿)" type="number" />
-                    <div id="reserve-section" class="bg-secondary-container/10 p-5 rounded-[2rem] border border-secondary/10">
-                        <label class="text-[10px] font-bold text-secondary uppercase mb-3 block px-1 tracking-widest">กันเงินสำรองฉุกเฉิน (%)</label>
-                        <input id="new-account-reserve-pct" oninput="calculateReserveHint()" class="w-full bg-surface-container border-none rounded-xl p-4 font-headline text-primary focus:ring-2 focus:ring-secondary" placeholder="0 - 100" type="number" />
-                        <div id="reserve-hint" class="mt-4 hidden text-[11px] flex flex-col gap-1.5 transition-all">
-                            <div class="flex justify-between"><span>ใช้ได้จริง:</span><span class="font-bold text-primary" id="hint-available">฿ 0</span></div>
-                            <div class="flex justify-between"><span>ล็อคสำรอง:</span><span class="font-bold text-secondary" id="hint-reserved">฿ 0</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="p-6 border-t border-outline-variant/10 shrink-0"><button onclick="saveAddAccount()" class="w-full bg-primary text-white py-5 rounded-full font-bold shadow-xl active:scale-95 transition-all">ยืนยันเพิ่มบัญชี</button></div>
-        </div>
-    </div>
-
-    <!-- Modal: Add Transaction -->
+    <!-- Modals -->
+    <!-- Transaction Modal -->
     <div id="modal-transaction" class="fixed inset-0 z-50 modal-hidden bg-on-surface/40 backdrop-blur-md flex items-center justify-center p-0 md:p-4 transition-all">
-        <div class="modal-content-anim bg-surface w-full max-w-lg md:rounded-[2.5rem] flex flex-col h-full md:h-auto max-h-screen md:max-h-[90vh] shadow-2xl">
-            <header class="p-6 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
-                <h2 class="font-headline font-bold text-xl text-primary">บันทึกรายการ</h2>
-                <button onclick="closeModal('modal-transaction')" class="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined">close</span></button>
-            </header>
-            <div class="p-6 space-y-8 overflow-y-auto flex-1 hide-scrollbar">
-                <div class="flex bg-surface-container-high p-1 rounded-full w-fit mx-auto">
-                    <button id="btn-type-expense" onclick="setTransactionType('expense')" class="px-10 py-3 rounded-full font-bold text-sm bg-white text-error shadow-sm transition-all">รายจ่าย</button>
-                    <button id="btn-type-income" onclick="setTransactionType('income')" class="px-10 py-3 rounded-full font-bold text-sm text-on-surface-variant transition-all">รายรับ</button>
+        <input type="hidden" id="edit-transaction-id" value="">
+        <div class="modal-content-anim bg-surface w-full max-w-md md:rounded-3xl flex flex-col h-full md:h-auto max-h-screen md:max-h-[90vh] shadow-2xl overflow-hidden">
+            <header class="p-5 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
+                <h2 id="transaction-modal-title" class="font-headline font-bold text-lg text-primary">บันทึกรายการ</h2>
+                <div class="flex gap-2">
+                    <button id="btn-delete-trans" onclick="deleteTransaction()" class="hidden w-8 h-8 bg-error/10 text-error rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined text-sm">delete</span></button>
+                    <button onclick="closeModal('modal-transaction')" class="w-8 h-8 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined text-sm">close</span></button>
                 </div>
-                
+            </header>
+            <div class="p-5 space-y-6 overflow-y-auto flex-1 hide-scrollbar">
+                <div id="trans-type-selector" class="flex bg-surface-container p-1 rounded-xl w-fit mx-auto overflow-x-auto hide-scrollbar max-w-full">
+                    <button id="btn-type-expense" onclick="setTransactionType('expense')" class="flex-1 px-5 py-2 rounded-lg font-bold text-xs bg-white text-error shadow-sm transition-all min-w-[70px]">รายจ่าย</button>
+                    <button id="btn-type-income" onclick="setTransactionType('income')" class="flex-1 px-5 py-2 rounded-lg font-bold text-xs text-on-surface-variant transition-all min-w-[70px]">รายรับ</button>
+                    <button id="btn-type-transfer" onclick="setTransactionType('transfer')" class="flex-1 px-5 py-2 rounded-lg font-bold text-xs text-on-surface-variant transition-all min-w-[70px]">โอนเงิน</button>
+                </div>
                 <div class="text-center">
-                    <span class="text-xs font-bold text-outline block mb-2 uppercase tracking-widest">ระบุจำนวนเงิน</span>
-                    <div class="flex items-center justify-center gap-1">
-                        <span id="currency-symbol" class="font-headline text-3xl font-bold opacity-30 text-error">฿</span>
-                        <input id="amount-input" class="w-full max-w-[220px] bg-transparent border-none text-center font-headline text-5xl md:text-6xl font-extrabold text-error focus:ring-0 placeholder:text-outline/20 tracking-tighter transition-all" placeholder="0.00" type="number" />
+                    <span class="text-[10px] font-bold text-outline block mb-2 uppercase tracking-widest">ระบุจำนวนเงิน</span>
+                    <div class="flex items-center justify-center gap-1 border-b border-surface-variant pb-2 mx-8">
+                        <span id="currency-symbol" class="font-headline text-2xl font-bold opacity-40 text-error">฿</span>
+                        <input id="amount-input" class="w-full max-w-[180px] bg-transparent border-none text-center font-headline text-4xl font-extrabold text-error focus:ring-0 placeholder:text-outline/30 tracking-tighter p-0" placeholder="0.00" type="number" />
                     </div>
                 </div>
+                <div id="category-section"><label class="text-[9px] font-bold uppercase text-outline mb-3 block px-1 tracking-widest">หมวดหมู่</label><div id="cat-grid" class="grid grid-cols-4 gap-2"></div></div>
+                <div id="account-section"><label class="text-[9px] font-bold uppercase text-outline mb-3 block px-1 tracking-widest">บัญชีที่ใช้</label><div id="trans-account-list" class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar"></div></div>
+                <div id="transfer-to-section" class="hidden"><label class="text-[9px] font-bold uppercase text-outline mb-3 block px-1 tracking-widest text-primary">โอนเข้าบัญชี</label><div id="trans-account-to-list" class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar"></div></div>
+            </div>
+            <div class="p-5 border-t border-outline-variant/10 shrink-0"><button onclick="saveTransaction()" class="w-full bg-primary text-white py-3 rounded-xl font-bold shadow-md active:scale-95 transition-all text-sm">บันทึก</button></div>
+        </div>
+    </div>
 
-                <div>
-                    <label class="text-[10px] font-bold uppercase text-outline mb-4 block px-1 tracking-widest">เลือกหมวดหมู่</label>
-                    <div id="cat-grid" class="grid grid-cols-4 gap-3"></div>
+    <!-- Account Modal -->
+    <div id="modal-add-account" class="fixed inset-0 z-50 modal-hidden bg-on-surface/50 backdrop-blur-md flex items-center justify-center p-4 transition-all">
+        <div class="modal-content-anim bg-surface w-full max-w-sm rounded-3xl shadow-2xl flex flex-col max-h-[90vh]">
+            <header class="p-5 border-b border-outline-variant/10 flex justify-between items-center shrink-0"><h2 id="add-account-modal-title" class="font-headline font-bold text-lg text-primary">เพิ่มบัญชี</h2><button onclick="closeModal('modal-add-account')" class="w-8 h-8 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined text-sm">close</span></button></header>
+            <div class="p-5 space-y-5 overflow-y-auto hide-scrollbar flex-1">
+                <div class="flex bg-surface-container p-1 rounded-xl gap-1 overflow-x-auto hide-scrollbar" id="account-type-grid">
+                    <button onclick="selectAccountType(this, 'bank')" id="btn-acc-bank" class="flex-1 min-w-[70px] py-2 px-1 rounded-lg border-2 border-primary bg-primary/5 text-primary text-[10px] font-bold ring-primary transition-all">เงินฝาก</button>
+                    <button onclick="selectAccountType(this, 'travel')" id="btn-acc-travel" class="flex-1 min-w-[70px] py-2 px-1 rounded-lg border-2 border-transparent text-on-surface-variant text-[10px] font-bold transition-all">Travel Card</button>
+                    <button onclick="selectAccountType(this, 'card')" id="btn-acc-card" class="flex-1 min-w-[70px] py-2 px-1 rounded-lg border-2 border-transparent text-on-surface-variant text-[10px] font-bold transition-all">บัตรเครดิต</button>
+                    <button onclick="selectAccountType(this, 'invest')" id="btn-acc-invest" class="flex-1 min-w-[70px] py-2 px-1 rounded-lg border-2 border-transparent text-on-surface-variant text-[10px] font-bold transition-all">การลงทุน</button>
                 </div>
-
-                <div>
-                    <label class="text-[10px] font-bold uppercase text-outline mb-4 block px-1 tracking-widest">บัญชีที่ใช้</label>
-                    <div id="trans-account-list" class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar"></div>
+                <div><label class="text-[9px] font-bold uppercase text-outline mb-2 block px-1">ผู้ให้บริการ</label>
+                <div id="provider-grid" class="grid grid-cols-4 gap-2">
+                    <button onclick="selectBank(this, 'KBank', 'savings', '#00A950')" class="provider-btn flex flex-col items-center gap-1 p-2 rounded-xl border border-outline-variant/20 transition-all"><div class="w-6 h-6 rounded-full bg-[#00A950] flex items-center justify-center text-white"><span class="material-symbols-outlined text-[14px]">savings</span></div><span class="text-[8px] font-bold">KBank</span></button>
+                    <button onclick="selectBank(this, 'SCB', 'account_balance_wallet', '#4E2A84')" class="provider-btn flex flex-col items-center gap-1 p-2 rounded-xl border border-outline-variant/20 transition-all"><div class="w-6 h-6 rounded-full bg-[#4E2A84] flex items-center justify-center text-white"><span class="material-symbols-outlined text-[14px]">account_balance_wallet</span></div><span class="text-[8px] font-bold">SCB</span></button>
+                    <button onclick="selectBank(this, 'BBL', 'account_balance', '#1E4598')" class="provider-btn flex flex-col items-center gap-1 p-2 rounded-xl border border-outline-variant/20 transition-all"><div class="w-6 h-6 rounded-full bg-[#1E4598] flex items-center justify-center text-white"><span class="material-symbols-outlined text-[14px]">account_balance</span></div><span class="text-[8px] font-bold">BBL</span></button>
+                    <button onclick="selectBank(this, 'Krungthai', 'account_balance', '#00A1E0')" class="provider-btn flex flex-col items-center gap-1 p-2 rounded-xl border border-outline-variant/20 transition-all"><div class="w-6 h-6 rounded-full bg-[#00A1E0] flex items-center justify-center text-white"><span class="material-symbols-outlined text-[14px]">account_balance</span></div><span class="text-[8px] font-bold">KTB</span></button>
+                    <button onclick="selectBank(this, 'TTB', 'payments', '#005DAA')" class="provider-btn flex flex-col items-center gap-1 p-2 rounded-xl border border-outline-variant/20 transition-all"><div class="w-6 h-6 rounded-full bg-[#005DAA] flex items-center justify-center text-white"><span class="material-symbols-outlined text-[14px]">payments</span></div><span class="text-[8px] font-bold">TTB</span></button>
+                    <button onclick="selectBank(this, 'GSB', 'savings', '#EC068D')" class="provider-btn flex flex-col items-center gap-1 p-2 rounded-xl border border-outline-variant/20 transition-all"><div class="w-6 h-6 rounded-full bg-[#EC068D] flex items-center justify-center text-white"><span class="material-symbols-outlined text-[14px]">savings</span></div><span class="text-[8px] font-bold">GSB</span></button>
+                    <button onclick="selectBank(this, 'Krungsri', 'account_balance', '#FFD200')" class="provider-btn flex flex-col items-center gap-1 p-2 rounded-xl border border-outline-variant/20 transition-all"><div class="w-6 h-6 rounded-full bg-[#FFD200] flex items-center justify-center text-[#1c1b1b]"><span class="material-symbols-outlined text-[14px]">account_balance</span></div><span class="text-[8px] font-bold">BAY</span></button>
+                    <button onclick="selectBank(this, 'เงินสด', 'payments', '#10B981')" class="provider-btn flex flex-col items-center gap-1 p-2 rounded-xl border border-outline-variant/20 transition-all"><div class="w-6 h-6 rounded-full bg-[#10B981] flex items-center justify-center text-white"><span class="material-symbols-outlined text-[14px]">payments</span></div><span class="text-[8px] font-bold">Cash</span></button>
+                </div></div>
+                <div class="space-y-3 pt-2">
+                    <input id="new-account-name" class="w-full bg-surface-container-low border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary" placeholder="ชื่อเรียกบัญชี" />
+                    <input id="new-account-balance" oninput="calculateReserveHint()" class="w-full bg-surface-container-low border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary" placeholder="ยอดเงิน (฿)" type="number" />
+                    <div id="debt-fields" class="hidden"><label class="text-[9px] font-bold uppercase text-outline px-1">วันชำระ (1-31)</label><input id="new-account-due-date" class="w-full bg-error/5 border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-error" placeholder="เช่น 25" type="number" /></div>
+                    <div id="reserve-section" class="bg-secondary-container/10 p-4 rounded-2xl border border-secondary/10"><label class="text-[9px] font-bold text-secondary uppercase mb-2 block px-1">กันสำรองฉุกเฉิน (%)</label><input id="new-account-reserve-pct" oninput="calculateReserveHint()" class="w-full bg-surface-container border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-secondary" placeholder="0 - 100" type="number" /><div id="reserve-hint" class="mt-3 hidden text-[10px] flex flex-col gap-1"><div class="flex justify-between"><span>ใช้ได้จริง:</span><span class="font-bold text-primary" id="hint-available">฿ 0</span></div><div class="flex justify-between"><span>ล็อคสำรอง:</span><span class="font-bold text-secondary" id="hint-reserved">฿ 0</span></div></div></div>
                 </div>
             </div>
-            <div class="p-6 border-t border-outline-variant/10 shrink-0"><button onclick="saveTransaction()" class="w-full bg-primary text-white py-5 rounded-full font-bold shadow-xl active:scale-95 transition-all">บันทึกรายการ</button></div>
+            <div class="p-5 border-t border-outline-variant/10 shrink-0"><button onclick="saveAddAccount()" class="w-full bg-primary text-white py-3 rounded-xl font-bold shadow-md active:scale-95 transition-all text-sm">บันทึกบัญชี</button></div>
         </div>
     </div>
 
     <!-- Edit Budget Modal -->
-    <div id="modal-edit-budget" class="fixed inset-0 z-50 modal-hidden bg-on-surface/40 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="modal-content-anim bg-surface w-full max-w-md rounded-[2.5rem] shadow-2xl flex flex-col">
-            <header class="p-6 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
-                <h2 class="font-headline font-bold text-xl text-primary" id="edit-budget-title">ตั้งงบประมาณ</h2>
-                <button onclick="closeModal('modal-edit-budget')" class="w-10 h-10 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined">close</span></button>
+    <div id="modal-edit-budget" class="fixed inset-0 z-50 modal-hidden bg-on-surface/40 backdrop-blur-md flex items-center justify-center p-4 transition-all">
+        <div class="modal-content-anim bg-surface w-full max-sm rounded-3xl shadow-2xl overflow-hidden">
+            <header class="p-5 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
+                <h2 id="edit-budget-title" class="font-headline font-bold text-lg text-primary">ตั้งงบประมาณ</h2>
+                <button onclick="closeModal('modal-edit-budget')" class="w-8 h-8 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined text-sm">close</span></button>
             </header>
-            <div class="p-10 text-center">
-                <span class="text-xs font-bold text-outline block mb-2 uppercase tracking-widest">เพดานต่อเดือน</span>
-                <div class="flex items-center justify-center gap-1 border-b-2 border-primary/20 pb-4 mx-6 md:mx-8">
-                    <span class="font-headline text-4xl text-primary/40 font-bold">฿</span>
-                    <input id="budget-amount-input" class="w-full bg-transparent border-none text-center font-headline text-4xl font-extrabold text-primary focus:ring-0 tracking-tighter" type="number" />
+            <div class="p-6 space-y-5">
+                <div>
+                    <label class="text-[9px] font-bold uppercase text-outline block mb-2 px-1">วงเงินรายเดือน (฿)</label>
+                    <input id="budget-amount-input" class="w-full bg-surface-container-low border-none rounded-xl p-4 font-headline text-2xl font-bold text-primary focus:ring-2 focus:ring-primary" type="number" placeholder="0.00" />
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="closeModal('modal-edit-budget')" class="flex-1 bg-surface-container text-on-surface-variant py-3 rounded-xl font-bold text-sm">ยกเลิก</button>
+                    <button onclick="saveEditBudget()" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm shadow-md">บันทึก</button>
                 </div>
             </div>
-            <div class="p-6 border-t border-outline-variant/10 shrink-0"><button onclick="saveEditBudget()" class="w-full bg-primary text-white py-4 rounded-full font-bold active:scale-95 shadow-lg transition-all">บันทึกงบประมาณ</button></div>
         </div>
     </div>
 
-    <!-- Toast UI -->
-    <div id="toast" class="fixed bottom-24 left-1/2 z-[100] bg-secondary-container text-on-secondary-container px-6 py-3 rounded-full shadow-2xl font-bold flex items-center gap-2 toast-hidden pointer-events-none transition-all duration-300 text-sm whitespace-nowrap">
-        <span class="material-symbols-outlined text-lg" id="toast-icon">check_circle</span> <span id="toast-message">บันทึกสำเร็จ</span>
+    <!-- Goal Modal -->
+    <div id="modal-add-goal" class="fixed inset-0 z-50 modal-hidden bg-on-surface/40 backdrop-blur-md flex items-center justify-center p-4 transition-all">
+        <div class="modal-content-anim bg-surface w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden">
+            <header class="p-5 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
+                <h2 class="font-headline font-bold text-lg text-primary">เพิ่มเป้าหมายใหม่</h2>
+                <button onclick="closeModal('modal-add-goal')" class="w-8 h-8 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined text-sm">close</span></button>
+            </header>
+            <div class="p-6 space-y-4">
+                <div class="space-y-3">
+                    <input id="goal-name" class="w-full bg-surface-container-low border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary" placeholder="ชื่อเป้าหมาย (เช่น ซื้อรถ, เที่ยวญี่ปุ่น)" />
+                    <input id="goal-target" class="w-full bg-surface-container-low border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary" placeholder="เป้าหมายเงินเก็บ (฿)" type="number" />
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="selectGoalIcon(this, 'flight')" class="goal-icon-btn p-2 rounded-xl border border-outline-variant/20 hover:bg-primary/5 transition-all text-2xl"><span class="material-symbols-outlined">flight</span></button>
+                        <button onclick="selectGoalIcon(this, 'home')" class="goal-icon-btn p-2 rounded-xl border border-outline-variant/20 hover:bg-primary/5 transition-all text-2xl"><span class="material-symbols-outlined">home</span></button>
+                        <button onclick="selectGoalIcon(this, 'directions_car')" class="goal-icon-btn p-2 rounded-xl border border-outline-variant/20 hover:bg-primary/5 transition-all text-2xl"><span class="material-symbols-outlined">directions_car</span></button>
+                        <button onclick="selectGoalIcon(this, 'savings')" class="goal-icon-btn p-2 rounded-xl border border-outline-variant/20 hover:bg-primary/5 transition-all text-2xl"><span class="material-symbols-outlined">savings</span></button>
+                    </div>
+                </div>
+                <button onclick="saveAddGoal()" class="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm mt-2">บันทึกเป้าหมาย</button>
+            </div>
+        </div>
     </div>
 
-    <!-- JavaScript Core -->
+    <!-- Bill Modal -->
+    <div id="modal-add-bill" class="fixed inset-0 z-50 modal-hidden bg-on-surface/40 backdrop-blur-md flex items-center justify-center p-4 transition-all">
+        <div class="modal-content-anim bg-surface w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden">
+            <header class="p-5 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
+                <h2 class="font-headline font-bold text-lg text-primary">เพิ่มบิลประจำ</h2>
+                <button onclick="closeModal('modal-add-bill')" class="w-8 h-8 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined text-sm">close</span></button>
+            </header>
+            <div class="p-6 space-y-4">
+                <div class="space-y-3">
+                    <input id="bill-name" class="w-full bg-surface-container-low border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary" placeholder="ชื่อบิล (เช่น ค่าไฟ, Netflix)" />
+                    <input id="bill-amount" class="w-full bg-surface-container-low border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary" placeholder="จำนวนเงิน (฿)" type="number" />
+                    <input id="bill-due" class="w-full bg-surface-container-low border-none rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary" placeholder="จ่ายทุกวันที่ (1-31)" type="number" />
+                </div>
+                <button onclick="saveAddBill()" class="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm mt-2">บันทึกบิล</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Deposit Modal -->
+    <div id="modal-goal-deposit" class="fixed inset-0 z-50 modal-hidden bg-on-surface/40 backdrop-blur-md flex items-center justify-center p-4 transition-all">
+        <input type="hidden" id="deposit-goal-id" value="">
+        <div class="modal-content-anim bg-surface w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden">
+            <header class="p-5 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
+                <h2 id="deposit-goal-title" class="font-headline font-bold text-lg text-primary">ฝากเงินเข้าเป้าหมาย</h2>
+                <button onclick="closeModal('modal-goal-deposit')" class="w-8 h-8 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined text-sm">close</span></button>
+            </header>
+            <div class="p-6 space-y-4">
+                <input id="deposit-amount" class="w-full bg-surface-container-low border-none rounded-xl p-4 font-headline text-2xl font-bold text-primary text-center" placeholder="0.00" type="number" />
+                <button onclick="confirmGoalDeposit()" class="w-full bg-secondary text-white py-3 rounded-xl font-bold text-sm shadow-md">ยืนยันการฝาก</button>
+                <button onclick="closeModal('modal-goal-deposit')" class="w-full text-on-surface-variant font-bold text-xs">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- 0. PWA & Offline Support (Virtual) ---
-        (function initPWA() {
-            const manifest = {
-                "name": "The Fluid Ledger",
-                "short_name": "Fluid",
-                "start_url": ".",
-                "display": "standalone",
-                "background_color": "#fcf9f8",
-                "theme_color": "#000666",
-                "icons": [{
-                    "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='192' height='192' fill='%23000666'><rect width='192' height='192'/><circle cx='96' cy='96' r='48' fill='%2391f78e'/></svg>",
-                    "sizes": "192x192",
-                    "type": "image/svg+xml"
-                }]
-            };
-            const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-            document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${URL.createObjectURL(manifestBlob)}">`);
-
-            if ('serviceWorker' in navigator) {
-                const swCode = `
-                    const CACHE = 'fluid-v1';
-                    self.addEventListener('install', e => {
-                        e.waitUntil(caches.open(CACHE).then(c => c.addAll([
-                            './',
-                            'https://cdn.tailwindcss.com?plugins=forms,container-queries',
-                            'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap',
-                            'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap'
-                        ])));
-                    });
-                    self.addEventListener('fetch', e => {
-                        e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-                    });
-                `;
-                const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(err => console.log('SW Error', err));
-            }
-        })();
-
-        // --- 1. Global State & Data ---
-        const defaultState = {
-            accounts: [],
-            goals: [],
+        // --- DATA STATE ---
+        const defaultState = { 
+            accounts: [], 
+            goals: [], 
+            history: [], 
+            bills: [], 
             budgets: [
-                { name: 'อาหาร', icon: 'restaurant', spent: 0, limit: 5000, color: 'error' },
-                { name: 'เดินทาง', icon: 'directions_car', spent: 0, limit: 3000, color: 'secondary' },
-                { name: 'ที่พัก', icon: 'home', spent: 0, limit: 8500, color: 'primary' },
-                { name: 'ลงทุน', icon: 'trending_up', spent: 0, limit: 5000, color: 'primary' },
-                { name: 'ช้อปปิ้ง', icon: 'shopping_bag', spent: 0, limit: 2500, color: 'surface-tint' },
-                { name: 'บิล/น้ำไฟ', icon: 'receipt_long', spent: 0, limit: 2000, color: 'secondary' },
-                { name: 'สุขภาพ', icon: 'medical_services', spent: 0, limit: 1500, color: 'secondary' },
-                { name: 'ทำบุญ', icon: 'volunteer_activism', spent: 0, limit: 500, color: 'primary' },
+                { name: 'อาหาร', icon: 'restaurant', spent: 0, limit: 5000, color: 'error' }, 
+                { name: 'เดินทาง', icon: 'directions_car', spent: 0, limit: 3000, color: 'secondary' }, 
+                { name: 'ที่พัก', icon: 'home', spent: 0, limit: 8500, color: 'primary' }, 
+                { name: 'ลงทุน', icon: 'trending_up', spent: 0, limit: 5000, color: 'primary' }, 
+                { name: 'ช้อปปิ้ง', icon: 'shopping_bag', spent: 0, limit: 2500, color: 'surface-tint' }, 
+                { name: 'บิล/น้ำไฟ', icon: 'receipt_long', spent: 0, limit: 2000, color: 'secondary' }, 
+                { name: 'สุขภาพ', icon: 'medical_services', spent: 0, limit: 1500, color: 'secondary' }, 
                 { name: 'อื่นๆ', icon: 'more_horiz', spent: 0, limit: 1000, color: 'secondary' }
-            ],
-            history: [],
-            toastTimer: null
+            ], 
+            homePeriod: 'month' 
         };
-
-        // ระบบโหลดข้อมูลและบันทึกข้อมูล (Local Storage)
-        const state = JSON.parse(localStorage.getItem('fluidLedgerData')) || defaultState;
-
-        function saveData() {
-            localStorage.setItem('fluidLedgerData', JSON.stringify(state));
+        
+        let state = JSON.parse(localStorage.getItem('pocketFlowData')) || defaultState;
+        function saveData() { localStorage.setItem('pocketFlowData', JSON.stringify(state)); }
+        function resetData() { 
+            if(confirm('ข้อมูลทั้งหมดจะถูกลบถาวร ต้องการล้างข้อมูลหรือไม่?')) { 
+                localStorage.removeItem('pocketFlowData'); 
+                location.reload(); 
+            } 
         }
 
-        function resetData() {
-            if(confirm('คุณต้องการลบข้อมูลทั้งหมดและเริ่มต้นใหม่หรือไม่? (ข้อมูลจะกลับไปเป็นค่าเริ่มต้น)')) {
-                localStorage.removeItem('fluidLedgerData');
-                location.reload();
-            }
-        }
-
-        const transCats = {
-            expense: [
-                {n:'อาหาร', i:'restaurant'}, {n:'เดินทาง', i:'directions_car'}, {n:'ที่พัก', i:'home'},
-                {n:'ช้อปปิ้ง', i:'shopping_bag'}, {n:'น้ำไฟ', i:'receipt_long'}, {n:'ลงทุน', i:'trending_up'},
-                {n:'สุขภาพ', i:'medical_services'}, {n:'บันเทิง', i:'sports_esports'}, {n:'ทำบุญ', i:'volunteer_activism'}
-            ],
-            income: [
-                {n:'เงินเดือน', i:'payments'}, {n:'ธุรกิจ', i:'storefront'}, {n:'ลงทุน', i:'trending_up'},
-                {n:'โบนัส', i:'emoji_events'}, {n:'ดอกเบี้ย', i:'account_balance'}
-            ]
+        const transCats = { 
+            expense: [{n:'อาหาร', i:'restaurant', c:'#ba1a1a'}, {n:'เดินทาง', i:'directions_car', c:'#006e1c'}, {n:'ที่พัก', i:'home', c:'#000666'}, {n:'ช้อปปิ้ง', i:'shopping_bag', c:'#4c56af'}, {n:'น้ำไฟ', i:'receipt_long', c:'#006e1c'}, {n:'สุขภาพ', i:'medical_services', c:'#006e1c'}, {n:'ลงทุน', i:'trending_up', c:'#000666'}, {n:'ทำบุญ', i:'volunteer_activism', c:'#000666'}], 
+            income: [{n:'เงินเดือน', i:'payments'}, {n:'ธุรกิจ', i:'storefront'}, {n:'ลงทุน', i:'trending_up'}, {n:'โบนัส', i:'emoji_events'}, {n:'ดอกเบี้ย', i:'account_balance'}] 
         };
 
-        // --- 2. Helper Functions ---
+        // --- UI HELPERS ---
         function setText(id, txt) { const el = document.getElementById(id); if(el) el.innerText = txt; }
-        function showToast(m, i='info') {
-            const t = document.getElementById('toast');
-            setText('toast-message', m); setText('toast-icon', i);
-            if(t) { t.classList.replace('toast-hidden', 'toast-visible'); clearTimeout(state.toastTimer); state.toastTimer = setTimeout(() => t.classList.replace('toast-visible', 'toast-hidden'), 3000); }
-        }
-        function openModal(id) { const el = document.getElementById(id); if(el) { el.classList.remove('modal-hidden'); el.classList.add('modal-visible'); document.body.style.overflow='hidden'; } }
-        function closeModal(id) { const el = document.getElementById(id); if(el) { el.classList.add('modal-hidden'); el.classList.remove('modal-visible'); document.body.style.overflow='auto'; } }
+        function setVal(id, val) { const el = document.getElementById(id); if(el) el.value = val; }
+        function showToast(m, i='info') { const t = document.getElementById('toast'); setText('toast-message', m); setText('toast-icon', i); if(t) { t.classList.replace('toast-hidden', 'toast-visible'); clearTimeout(state.toastTimer); state.toastTimer = setTimeout(() => t.classList.replace('toast-visible', 'toast-hidden'), 3000); } }
+        function openModal(id) { document.getElementById(id)?.classList.replace('modal-hidden', 'modal-visible'); document.body.style.overflow='hidden'; }
+        function closeModal(id) { document.getElementById(id)?.classList.replace('modal-visible', 'modal-hidden'); document.body.style.overflow='auto'; }
 
-        // --- 3. Core Navigation ---
         function switchTab(tab) {
-            const views = document.querySelectorAll('.view-section');
-            const navBtns = document.querySelectorAll('.nav-btn');
-            const target = document.getElementById(`view-${tab}`);
-            if(!target) return;
-
-            views.forEach(v => v.classList.remove('active'));
-            target.classList.add('active');
-
-            navBtns.forEach(btn => {
-                btn.className = 'nav-btn flex-1 flex flex-col items-center justify-center text-on-surface-variant/50 transition-all';
-                const icon = btn.querySelector('.material-symbols-outlined');
-                if(icon) icon.style.fontVariationSettings = "'FILL' 0";
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${tab}`)?.classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(btn => { 
+                btn.className = 'nav-btn flex-1 flex flex-col items-center justify-center text-on-surface-variant/50 transition-all'; 
+                btn.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0"; 
             });
-
-            const activeBtn = document.getElementById(`nav-${tab}`);
-            if(activeBtn) {
-                activeBtn.className = 'nav-btn flex-1 flex flex-col items-center justify-center text-primary font-bold transition-all';
-                const activeIcon = activeBtn.querySelector('.material-symbols-outlined');
-                if(activeIcon) activeIcon.style.fontVariationSettings = "'FILL' 1";
+            const activeBtn = document.getElementById(`nav-${tab}`); 
+            if(activeBtn) { 
+                activeBtn.className = 'nav-btn flex-1 flex flex-col items-center justify-center text-primary font-bold transition-all'; 
+                activeBtn.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1"; 
             }
-
-            const header = document.getElementById('header-title');
-            if(header) header.innerText = { home: 'The Fluid Ledger', analytics: 'วิเคราะห์ข้อมูล', budget: 'จัดการงบประมาณ', vaults: 'ภาพรวมบัญชี' }[tab] || 'The Fluid Ledger';
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setText('header-title', { home: 'PocketFlow', analytics: 'วิเคราะห์ข้อมูล', budget: 'งบ & บิล', vaults: 'บัญชี' }[tab] || 'PocketFlow');
             refreshUI();
         }
 
-        // --- 4. UI Renders ---
+        // --- LOGIC FUNCTIONS ---
+        function calculateReserveHint() {
+            const bal = parseFloat(document.getElementById('new-account-balance').value || 0), pct = parseFloat(document.getElementById('new-account-reserve-pct').value || 0);
+            const res = bal * (pct/100); setText('hint-reserved', `฿ ${res.toLocaleString()}`); setText('hint-available', `฿ ${(bal - res).toLocaleString()}`);
+            document.getElementById('reserve-hint').classList.toggle('hidden', pct <= 0 || bal <= 0);
+        }
+
+        function openAddAccountModal(t = 'bank') {
+            setText('add-account-modal-title', 'เพิ่มบัญชีใหม่');
+            setVal('new-account-name', ''); setVal('new-account-balance', ''); setVal('new-account-reserve-pct', ''); setVal('new-account-due-date', '');
+            document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('ring-2', 'ring-primary', 'bg-primary/5'));
+            const typeBtn = document.getElementById(`btn-acc-${t}`);
+            if(typeBtn) selectAccountType(typeBtn, t);
+            openModal('modal-add-account');
+        }
+
+        function selectAccountType(btn, t) {
+            btn.parentElement.querySelectorAll('button').forEach(b => b.className = "flex-1 min-w-[70px] py-2 px-1 rounded-lg border-2 border-transparent text-on-surface-variant text-[10px] font-bold transition-all");
+            btn.className = "flex-1 min-w-[70px] py-2 px-1 rounded-lg border-2 border-primary bg-primary/5 text-primary text-[10px] font-bold transition-all";
+            document.getElementById('reserve-section').classList.toggle('hidden', t === 'card' || t === 'invest');
+            document.getElementById('debt-fields').classList.toggle('hidden', t !== 'card');
+            btn.parentElement.dataset.type = t;
+        }
+
+        function selectBank(btn, n, i, c) {
+            document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('ring-2', 'ring-primary', 'bg-primary/5'));
+            btn.classList.add('ring-2', 'ring-primary', 'bg-primary/5'); setVal('new-account-name', n);
+            btn.dataset.icon = i; btn.dataset.color = c;
+        }
+
+        function saveAddAccount() {
+            const n = document.getElementById('new-account-name').value, b = parseFloat(document.getElementById('new-account-balance').value), p = parseFloat(document.getElementById('new-account-reserve-pct').value || 0);
+            const t = document.getElementById('account-type-grid').dataset.type, bank = document.querySelector('.provider-btn.ring-primary');
+            if(!n || isNaN(b)) return showToast('กรุณากรอกข้อมูลให้ครบ', 'error');
+            state.accounts.push({ id: Date.now(), name: n, balance: b, reserve: p, icon: bank?.dataset.icon || 'account_balance', color: bank?.dataset.color || '#444', type: t });
+            saveData(); closeModal('modal-add-account'); refreshUI(); showToast('เพิ่มบัญชีสำเร็จ');
+        }
+
+        function openTransactionModal(type, prefillAmt = null) { 
+            if (!state.accounts.length) return showToast('กรุณาเพิ่มบัญชีก่อนบันทึกรายการ', 'error');
+            setVal('edit-transaction-id', ''); setVal('amount-input', prefillAmt || '');
+            document.getElementById('btn-delete-trans').classList.add('hidden');
+            setText('transaction-modal-title', 'บันทึกรายการ');
+            setTransactionType(type); populateAccountLists(); openModal('modal-transaction'); 
+        }
+
+        function openEditTransactionModal(id) {
+            const h = state.history.find(x => x.id === id);
+            if(!h) return;
+            openTransactionModal(h.type, h.amount);
+            setVal('edit-transaction-id', id);
+            document.getElementById('btn-delete-trans').classList.remove('hidden');
+            setText('transaction-modal-title', 'แก้ไขรายการ');
+            setTimeout(() => {
+                const accBtn = document.querySelector(`#trans-account-list button[data-id="${h.accountId}"]`);
+                if(accBtn) selectTransAccount(accBtn, h.accountId);
+            }, 50);
+        }
+
+        function setTransactionType(type) {
+            document.getElementById('trans-type-selector').dataset.type = type;
+            ['expense', 'income', 'transfer'].forEach(t => document.getElementById(`btn-type-${t}`).className = `flex-1 px-5 py-2 rounded-lg font-bold text-xs ${t===type?'bg-white text-primary shadow-sm':'text-on-surface-variant'}`);
+            const isT = type === 'transfer'; document.getElementById('category-section').classList.toggle('hidden', isT); document.getElementById('transfer-to-section').classList.toggle('hidden', !isT);
+            if(!isT) document.getElementById('cat-grid').innerHTML = transCats[type].map(c => `<button onclick="selectCategory(this, '${c.n}', '${c.i}')" class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-surface-container-low active:scale-95 transition-all"><div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 text-sm"><span class="material-symbols-outlined text-sm">${c.i}</span></div><span class="text-[8px] font-bold uppercase tracking-tight">${c.n}</span></button>`).join('');
+        }
+        
+        function selectCategory(btn, n, i) { btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('ring-2', 'ring-primary')); btn.classList.add('ring-2', 'ring-primary'); btn.dataset.name = n; btn.dataset.icon = i; }
+        
+        function populateAccountLists() {
+            const list = document.getElementById('trans-account-list'), toList = document.getElementById('trans-account-to-list');
+            const html = state.accounts.map((a, i) => `<button onclick="selectTransAccount(this, ${a.id})" class="px-4 py-2 rounded-lg ${i===0?'bg-primary text-white ring-2 ring-primary ring-offset-2':'bg-surface-container text-on-surface-variant'} text-[10px] font-bold whitespace-nowrap shrink-0 transition-all" data-id="${a.id}">${a.name}</button>`).join('');
+            list.innerHTML = html; toList.innerHTML = html;
+        }
+
+        function selectTransAccount(btn, id) { btn.parentElement.querySelectorAll('button').forEach(b => b.className = "px-4 py-2 rounded-lg bg-surface-container text-on-surface-variant text-[10px] font-bold whitespace-nowrap shrink-0"); btn.className = "px-4 py-2 rounded-lg bg-primary text-white ring-2 ring-primary ring-offset-2 text-[10px] font-bold whitespace-nowrap shrink-0"; }
+        function selectTransAccountTo(btn, id) { btn.parentElement.querySelectorAll('button').forEach(b => b.className = "px-4 py-2 rounded-lg bg-surface-container text-on-surface-variant text-[10px] font-bold whitespace-nowrap shrink-0"); btn.className = "px-4 py-2 rounded-lg bg-primary text-white ring-2 ring-primary ring-offset-2 text-[10px] font-bold whitespace-nowrap shrink-0"; }
+
+        function reverseTransaction(h) {
+            const acc = state.accounts.find(a => a.id == h.accountId);
+            if(!acc) return;
+            if(h.type === 'income') acc.balance -= h.amount;
+            else if(h.type === 'expense') acc.balance += h.amount;
+            else if(h.type === 'transfer') {
+                acc.balance += h.amount;
+                const toAcc = state.accounts.find(a => a.id == h.toAccountId);
+                if(toAcc) toAcc.balance -= h.amount;
+            }
+        }
+
+        function deleteTransaction() {
+            const id = parseInt(document.getElementById('edit-transaction-id').value);
+            const hIdx = state.history.findIndex(x => x.id === id);
+            if(hIdx > -1) { reverseTransaction(state.history[hIdx]); state.history.splice(hIdx, 1); saveData(); closeModal('modal-transaction'); refreshUI(); showToast('ลบรายการสำเร็จ'); }
+        }
+
+        function saveTransaction() {
+            const amt = parseFloat(document.getElementById('amount-input').value), type = document.getElementById('trans-type-selector').dataset.type, accBtn = document.querySelector('#trans-account-list button.ring-primary'), editId = parseInt(document.getElementById('edit-transaction-id').value);
+            if(isNaN(amt) || amt <= 0 || !accBtn) return showToast('กรุณากรอกจำนวนเงินและเลือกบัญชี');
+            const from = state.accounts.find(a => a.id == accBtn.dataset.id);
+            if(editId) { const old = state.history.find(x => x.id === editId); if(old) reverseTransaction(old); state.history = state.history.filter(x => x.id !== editId); }
+            if(type === 'transfer') {
+                const toBtn = document.querySelector('#trans-account-to-list button.ring-primary'), to = state.accounts.find(a => a.id == toBtn.dataset.id);
+                if(from.id === to.id) return showToast('ไม่สามารถโอนเข้าบัญชีเดียวกันได้', 'error');
+                from.balance -= amt; to.balance += amt; 
+                state.history.push({ id: Date.now(), title: `โอนไป ${to.name}`, amount: amt, type: 'transfer', accountName: from.name, icon: 'sync_alt', accountId: from.id, toAccountId: to.id });
+            } else {
+                const cat = document.querySelector('#cat-grid button.ring-primary'); 
+                from.balance += (type === 'income' ? amt : -amt);
+                state.history.push({ id: Date.now(), title: cat?.dataset.name || 'รายการทั่วไป', amount: amt, type, accountName: from.name, icon: cat?.dataset.icon || 'receipt', accountId: from.id });
+            }
+            saveData(); closeModal('modal-transaction'); refreshUI(); showToast('บันทึกเรียบร้อย');
+        }
+
+        function openAddGoalModal() { setVal('goal-name', ''); setVal('goal-target', ''); openModal('modal-add-goal'); }
+        function selectGoalIcon(btn, icon) { document.querySelectorAll('.goal-icon-btn').forEach(b => b.classList.remove('bg-primary/10', 'border-primary')); btn.classList.add('bg-primary/10', 'border-primary'); btn.dataset.icon = icon; }
+        function saveAddGoal() {
+            const n = document.getElementById('goal-name').value, t = parseFloat(document.getElementById('goal-target').value), i = document.querySelector('.goal-icon-btn.border-primary')?.dataset.icon || 'savings';
+            if(!n || isNaN(t)) return showToast('กรุณากรอกข้อมูลให้ครบ');
+            state.goals.push({ id: Date.now(), name: n, target: t, current: 0, icon: i }); saveData(); closeModal('modal-add-goal'); refreshUI(); showToast('เพิ่มเป้าหมายสำเร็จ');
+        }
+        function openGoalDepositModal(id) { const g = state.goals.find(x => x.id === id); setVal('deposit-goal-id', id); setText('deposit-goal-title', `ฝากเงิน: ${g.name}`); setVal('deposit-amount', ''); openModal('modal-goal-deposit'); }
+        function confirmGoalDeposit() {
+            const id = parseInt(document.getElementById('deposit-goal-id').value), amt = parseFloat(document.getElementById('deposit-amount').value);
+            const goal = state.goals.find(x => x.id === id), acc = state.accounts[0];
+            if(!acc) return showToast('กรุณาเพิ่มบัญชีก่อนออมเงิน', 'error');
+            if(isNaN(amt) || amt <= 0) return showToast('ระบุจำนวนเงินที่ถูกต้อง');
+            acc.balance -= amt; goal.current += amt; 
+            state.history.push({ id: Date.now(), title: `ออม: ${goal.name}`, amount: amt, type: 'expense', accountName: acc.name, icon: 'savings', accountId: acc.id });
+            saveData(); closeModal('modal-goal-deposit'); refreshUI(); showToast('ฝากเงินสำเร็จ');
+        }
+
+        function openAddBillModal() { setVal('bill-name', ''); setVal('bill-amount', ''); setVal('bill-due', ''); openModal('modal-add-bill'); }
+        function saveAddBill() {
+            const n = document.getElementById('bill-name').value, a = parseFloat(document.getElementById('bill-amount').value), d = document.getElementById('bill-due').value;
+            if(!n || isNaN(a)) return showToast('กรุณากรอกข้อมูลให้ครบ');
+            state.bills.push({ id: Date.now(), name: n, amount: a, dueDate: d }); saveData(); closeModal('modal-add-bill'); refreshUI(); showToast('เพิ่มบิลสำเร็จ');
+        }
+        function payBill(id) {
+            const bill = state.bills.find(b => b.id === id), acc = state.accounts[0];
+            if(!acc) return showToast('กรุณาเพิ่มบัญชีก่อนจ่ายบิล', 'error');
+            acc.balance -= bill.amount; 
+            state.history.push({ id: Date.now(), title: `จ่ายบิล: ${bill.name}`, amount: bill.amount, type: 'expense', accountName: acc.name, icon: 'receipt_long', accountId: acc.id });
+            saveData(); refreshUI(); showToast('จ่ายบิลเรียบร้อย');
+        }
+
+        function openEditBudgetModal(name, limit) { setText('edit-budget-title', `งบ: ${name}`); document.getElementById('edit-budget-title').dataset.name = name; setVal('budget-amount-input', limit); openModal('modal-edit-budget'); }
+        function saveEditBudget() {
+            const name = document.getElementById('edit-budget-title').dataset.name, amt = parseFloat(document.getElementById('budget-amount-input').value);
+            const b = state.budgets.find(x => x.name === name); if(b) b.limit = amt; saveData(); closeModal('modal-edit-budget'); refreshUI(); showToast('ปรับงบเรียบร้อย');
+        }
+
+        function changeHomePeriod(period) {
+            state.homePeriod = period;
+            ['week', 'month', 'year'].forEach(p => {
+                const btn = document.getElementById(`period-${p}`);
+                if(btn) btn.className = (p === period) ? "px-6 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-primary shadow-sm" : "px-6 py-1.5 rounded-lg text-xs font-bold transition-all text-on-surface-variant";
+            });
+            refreshUI();
+        }
+
+        function getGroupedData(history, period) {
+            const groups = [];
+            const now = new Date();
+            if (period === 'week') {
+                const days = ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'];
+                days.forEach((label, i) => {
+                    const dayIdx = (i + 1) % 7; 
+                    const filtered = history.filter(h => new Date(h.id).getDay() === dayIdx);
+                    groups.push({ label, inc: filtered.filter(h => h.type === 'income').reduce((s, h) => s + h.amount, 0), exp: filtered.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0) });
+                });
+            } else if (period === 'month') {
+                for (let w = 1; w <= 5; w++) {
+                    const filtered = history.filter(h => {
+                        const d = new Date(h.id).getDate();
+                        if (w === 1) return d >= 1 && d <= 7;
+                        if (w === 2) return d >= 8 && d <= 14;
+                        if (w === 3) return d >= 15 && d <= 21;
+                        if (w === 4) return d >= 22 && d <= 28;
+                        return d >= 29;
+                    });
+                    if (w === 5 && filtered.length === 0) continue;
+                    groups.push({ label: `ส.${w}`, inc: filtered.filter(h => h.type === 'income').reduce((s, h) => s + h.amount, 0), exp: filtered.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0) });
+                }
+            } else if (period === 'year') {
+                const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+                months.forEach((label, i) => {
+                    const filtered = history.filter(h => new Date(h.id).getMonth() === i);
+                    groups.push({ label, inc: filtered.filter(h => h.type === 'income').reduce((s, h) => s + h.amount, 0), exp: filtered.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0) });
+                });
+            }
+            return groups;
+        }
+
         function refreshUI() {
-            const totalNet = state.accounts.reduce((s, a) => s + (a.type === 'bank' ? a.balance : -a.balance), 0);
-            setText('home-total-balance', `฿ ${totalNet.toLocaleString()}`);
-            setText('vault-networth-display', `฿ ${totalNet.toLocaleString()}`);
-
-            const spent = state.budgets.reduce((s, b) => s + b.spent, 0);
-            const limit = state.budgets.reduce((s, b) => s + b.limit, 0);
-            const pct = Math.round((spent/limit)*100) || 0;
-            setText('home-budget-spent', `฿ ${spent.toLocaleString()}`);
-            setText('home-budget-limit', `฿ ${limit.toLocaleString()}`);
-            setText('home-budget-pct', `${pct}%`);
-            setText('home-budget-remain', `เหลือ ฿ ${(limit-spent).toLocaleString()}`);
-            const bBar = document.getElementById('home-budget-bar');
-            if(bBar) bBar.style.width = `${Math.min(100, pct)}%`;
-
-            const currentReserve = state.accounts.reduce((s, a) => s + (a.balance * (a.reserve/100)), 0);
+            const total = state.accounts.reduce((s, a) => s + (a.type === 'card' ? -a.balance : a.balance), 0);
+            setText('home-total-balance', `฿ ${total.toLocaleString()}`); setText('vault-networth-display', `฿ ${total.toLocaleString()}`);
+            const now = new Date();
+            const getFilteredHistory = (period) => state.history.filter(h => {
+                const d = new Date(h.id);
+                if(period === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                if(period === 'year') return d.getFullYear() === now.getFullYear();
+                if(period === 'week') { const weekAgo = new Date(); weekAgo.setDate(now.getDate() - 7); return d >= weekAgo; }
+                return true;
+            });
+            const wHist = getFilteredHistory('week'), mHist = getFilteredHistory('month'), yHist = getFilteredHistory('year');
+            const getNet = (h) => h.reduce((s, x) => s + (x.type==='income'?x.amount:(x.type==='expense'?-x.amount:0)), 0);
+            setText('ana-summary-week', `฿${getNet(wHist).toLocaleString()}`);
+            setText('ana-summary-month', `฿${getNet(mHist).toLocaleString()}`);
+            setText('ana-summary-year', `฿${getNet(yHist).toLocaleString()}`);
+            const homeMonthHistory = getFilteredHistory('month');
+            setText('home-total-income', `฿ ${homeMonthHistory.filter(h => h.type === 'income').reduce((s, h) => s + h.amount, 0).toLocaleString()}`); 
+            setText('home-total-expense', `฿ ${homeMonthHistory.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0).toLocaleString()}`);
+            const bSpent = state.budgets.reduce((s, b) => s + homeMonthHistory.filter(h => h.title === b.name).reduce((ss, h) => ss + h.amount, 0), 0);
+            const bLimit = state.budgets.reduce((s, b) => s + b.limit, 0);
+            const pct = Math.round((bSpent/bLimit)*100) || 0;
+            setText('home-budget-pct', `${pct}%`); setText('home-budget-spent', `฿ ${bSpent.toLocaleString()}`); setText('home-budget-limit', `฿ ${bLimit.toLocaleString()}`);
+            document.getElementById('home-budget-bar').style.width = `${Math.min(100, pct)}%`;
+            const curHistory = getFilteredHistory(state.homePeriod);
+            const grouped = getGroupedData(curHistory, state.homePeriod);
+            const currentReserve = state.accounts.reduce((s, a) => s + (a.type==='bank' ? a.balance * (a.reserve/100) : 0), 0);
             setText('ana-ef-total', `฿ ${Math.round(currentReserve).toLocaleString()}`);
-            const efPct = Math.round((currentReserve / 104400) * 100);
+            const efTarget = (state.budgets.reduce((s, b) => s + b.limit, 0) + state.bills.reduce((s, b) => s + b.amount, 0)) * 6;
+            setText('ana-ef-target', `฿ ${efTarget.toLocaleString()}`);
+            const efPct = efTarget > 0 ? Math.round((currentReserve / efTarget) * 100) : 0;
             setText('ana-ef-pct', `${efPct}%`);
-            const efBar = document.getElementById('ana-ef-bar');
-            if(efBar) efBar.style.width = `${Math.min(100, efPct)}%`;
+            const efBar = document.getElementById('ana-ef-bar'); if(efBar) efBar.style.width = `${Math.min(100, efPct)}%`;
+            renderHistory(); renderVaults(); renderBudgets(); renderGoals(); renderBills(); 
+            renderAnalyticsChart(curHistory);
+            renderMultiComparison(grouped);
+            const map = document.getElementById('density-map'); if(map) map.innerHTML = Array.from({length: 21}).map(() => `<div class="w-6 h-6 rounded-md bg-primary opacity-${[10, 20, 40, 60, 80, 100][Math.floor(Math.random() * 6)]}"></div>`).join('');
+        }
 
-            const tInc = state.history.filter(h => h.type === 'income').reduce((s, h) => s + h.amount, 0);
-            const tExp = state.history.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0);
-            setText('home-total-income', `฿ ${tInc.toLocaleString()}`);
-            setText('home-total-expense', `฿ ${tExp.toLocaleString()}`);
-
-            renderHistory(); renderVaults(); renderBudgets(); renderGoals(); renderHeatmap();
+        function renderMultiComparison(grouped) {
+            const cont = document.getElementById('analytics-comparison-container'), stats = document.getElementById('comparison-stats'); 
+            if(!cont || !stats) return;
+            const maxVal = Math.max(...grouped.map(g => Math.max(g.inc, g.exp)), 1000);
+            cont.innerHTML = grouped.map(g => {
+                const incH = (g.inc / maxVal) * 100, expH = (g.exp / maxVal) * 100;
+                return `<div class="flex flex-col items-center gap-2 group min-w-[60px]"><div class="flex items-end gap-1 h-48">
+                        <div class="w-4 bg-secondary rounded-t-lg bar-animate shadow-sm relative" style="height: ${Math.max(2, incH)}%"><div class="absolute -top-6 left-1/2 -translate-x-1/2 hidden group-hover:block bg-secondary text-white text-[7px] px-1 rounded font-bold">฿${g.inc.toLocaleString()}</div></div>
+                        <div class="w-4 bg-error rounded-t-lg bar-animate shadow-sm relative" style="height: ${Math.max(2, expH)}%"><div class="absolute -top-6 left-1/2 -translate-x-1/2 hidden group-hover:block bg-error text-white text-[7px] px-1 rounded font-bold">฿${g.exp.toLocaleString()}</div></div>
+                    </div><span class="text-[10px] font-bold text-on-surface-variant/60">${g.label}</span></div>`;
+            }).join('');
+            const totalInc = grouped.reduce((s, g) => s + g.inc, 0), totalExp = grouped.reduce((s, g) => s + g.exp, 0);
+            stats.innerHTML = `<div class="bg-surface-container-low p-4 rounded-2xl flex justify-between items-center border border-outline-variant/5 shadow-sm"><div><p class="text-[9px] font-bold text-outline uppercase tracking-widest mb-1">กระแสเงินสดช่วงนี้</p><p class="text-xl font-black ${totalInc >= totalExp ? 'text-secondary' : 'text-error'}">฿${(totalInc - totalExp).toLocaleString()}</p></div><div class="w-10 h-10 rounded-full ${totalInc >= totalExp ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'} flex items-center justify-center"><span class="material-symbols-outlined">${totalInc >= totalExp ? 'trending_up' : 'trending_down'}</span></div></div><div class="bg-primary/5 p-4 rounded-2xl flex items-center gap-3"><span class="material-symbols-outlined text-primary text-xl">insights</span><p class="text-[10px] font-medium text-primary-container leading-snug">${totalInc >= totalExp ? 'กระแสเงินสดเป็นบวก! แสดงว่าคุณมีการจัดการเงินที่ดีในช่วงนี้' : 'มีการใช้จ่ายเกินรายรับเล็กน้อยในช่วงเวลานี้ ลองตรวจสอบรายการล่าสุดดูครับ'}</p></div>`;
         }
 
         function renderHistory() {
-            const list = document.getElementById('home-history-list');
-            if(!list) return;
-            const items = state.history.slice(-3).reverse();
-            if(!items.length) { list.innerHTML = `<p class="text-center py-4 text-xs opacity-40">ไม่มีรายการ</p>`; return; }
-            list.innerHTML = items.map(h => `
-                <div class="flex items-center justify-between p-1 active:scale-[0.98] transition-all">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant shrink-0 shadow-sm"><span class="material-symbols-outlined text-xl">${h.icon || 'receipt_long'}</span></div>
-                        <div class="min-w-0"><span class="text-sm font-bold block truncate text-primary">${h.title}</span><span class="text-[10px] text-on-surface-variant font-medium uppercase opacity-50">${h.accountName}</span></div>
-                    </div>
-                    <span class="text-sm font-extrabold ${h.type==='income'?'text-secondary':'text-error'}">฿ ${h.amount.toLocaleString()}</span>
-                </div>
-            `).join('');
+            const list = document.getElementById('home-history-list'); if(!list) return;
+            const items = state.history.slice(-5).reverse();
+            list.innerHTML = items.length ? items.map(h => `<div class="flex items-center justify-between p-3 bg-surface-container-lowest border border-outline-variant/10 rounded-2xl cursor-pointer active:scale-95 transition-all shadow-sm hover:border-primary/20" onclick="openEditTransactionModal(${h.id})"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-sm">${h.icon || 'receipt'}</span></div><div class="min-w-0"><p class="text-sm font-bold text-primary truncate">${h.title}</p><p class="text-[8px] text-outline uppercase font-bold">${h.accountName}</p></div></div><p class="text-sm font-bold ${h.type==='income'?'text-secondary':h.type==='expense'?'text-error':'text-primary'}">${h.type==='expense'?'-':h.type==='income'?'+':''} ฿${h.amount.toLocaleString()}</p></div>`).join('') : `<p class="text-center text-xs opacity-40 py-4 italic">ยังไม่มีรายการบันทึก</p>`;
         }
 
         function renderVaults() {
-            const bGrid = document.getElementById('vault-bank-grid');
-            const cGrid = document.getElementById('vault-card-grid');
-            if(!bGrid || !cGrid) return;
-            bGrid.innerHTML = ''; cGrid.innerHTML = '';
-            state.accounts.forEach(acc => {
-                const isBank = acc.type === 'bank';
-                const available = acc.balance - (acc.balance * (acc.reserve/100));
-                const html = `
-                    <div class="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/10 shadow-sm active:scale-[0.98] transition-all cursor-pointer">
-                        <div class="flex justify-between items-start mb-5">
-                            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-sm" style="background:${acc.color}"><span class="material-symbols-outlined text-2xl">${acc.icon}</span></div>
-                            ${isBank && acc.reserve > 0 && available < 1500 ? '<span class="bg-error-container text-error text-[9px] px-2 py-0.5 rounded-full font-bold uppercase animate-pulse">ใกล้เส้นสำรอง!</span>' : ''}
-                        </div>
-                        <h4 class="font-headline font-bold text-lg">${acc.name}</h4>
-                        <div class="mt-2 text-3xl font-extrabold ${isBank?'text-primary':'text-error'} tracking-tighter">${!isBank?'- ':''}฿ ${acc.balance.toLocaleString()}</div>
-                        ${isBank && acc.reserve > 0 ? `<div class="mt-4 pt-4 border-t border-outline-variant/5"><div class="flex justify-between text-[10px] font-bold"><span>สำรอง ${acc.reserve}%</span><span class="text-secondary font-extrabold">ใช้ได้ ฿ ${available.toLocaleString()}</span></div><div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden mt-1.5"><div class="h-full bg-secondary" style="width:${acc.reserve}%"></div></div></div>` : ''}
-                    </div>
-                `;
-                (isBank ? bGrid : cGrid).insertAdjacentHTML('beforeend', html);
+            ['bank', 'travel', 'card', 'invest'].forEach(t => {
+                const grid = document.getElementById(`vault-${t}-grid`); if(!grid) return;
+                const items = state.accounts.filter(a => a.type === t);
+                grid.innerHTML = items.map(a => `<div class="p-5 rounded-2xl shadow-sm card-pattern text-white flex flex-col justify-between min-h-[100px]" style="background:${a.color}"><div class="flex justify-between items-start font-bold text-xs"><span>${a.name}</span><span class="material-symbols-outlined text-sm opacity-60">${a.icon}</span></div><p class="text-2xl font-black">฿ ${a.balance.toLocaleString()}</p></div>`).join('') + `<button onclick="openAddAccountModal('${t}')" class="w-full bg-surface-container-lowest border-2 border-dashed border-outline-variant/30 p-4 rounded-2xl flex flex-col items-center justify-center text-primary group active:scale-95 transition-all hover:bg-primary/5"><span class="material-symbols-outlined group-hover:scale-110 transition-transform">add_card</span><span class="text-[9px] font-bold uppercase mt-1">เพิ่มบัญชี</span></button>`;
             });
         }
 
         function renderBudgets() {
-            const list = document.getElementById('budget-categories-list');
-            if(!list) return;
+            const list = document.getElementById('budget-categories-list'); if(!list) return;
+            const now = new Date();
+            const curMonth = state.history.filter(h => { const d = new Date(h.id); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
             list.innerHTML = state.budgets.map(b => {
-                const pct = Math.min(100, Math.round((b.spent/b.limit)*100)) || 0;
-                return `<div onclick="openEditBudgetModal('${b.name}', ${b.limit})" class="bg-surface-container-low p-5 rounded-[2rem] border border-outline-variant/5 cursor-pointer active:scale-[0.99] transition-all hover:bg-surface-container"><div class="flex justify-between items-center mb-3"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-surface-container-lowest rounded-2xl flex items-center justify-center text-${b.color} shadow-sm"><span class="material-symbols-outlined">${b.icon}</span></div><h4 class="font-headline font-bold text-sm text-primary">${b.name}</h4></div><div class="text-right shrink-0"><p class="text-sm font-extrabold text-primary">฿ ${b.spent.toLocaleString()} <span class="text-[10px] opacity-30 font-medium">/ ${b.limit.toLocaleString()}</span></p></div></div><div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden"><div class="h-full bg-${b.color} transition-all duration-1000" style="width:${pct}%"></div></div></div>`;
+                const spent = curMonth.filter(h => h.title === b.name).reduce((s, h) => s + h.amount, 0);
+                const pct = Math.min(100, (spent/b.limit)*100) || 0;
+                return `<div onclick="openEditBudgetModal('${b.name}', ${b.limit})" class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm cursor-pointer hover:border-primary/50 transition-all"><div class="flex justify-between items-center mb-2"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-${b.color}">${b.icon}</span><h4 class="text-xs font-bold">${b.name}</h4></div><p class="text-[9px] font-bold text-primary">฿${spent.toLocaleString()} / ฿${b.limit.toLocaleString()}</p></div><div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden"><div class="h-full bg-${b.color}" style="width:${pct}%"></div></div></div>`;
             }).join('');
         }
 
         function renderGoals() {
-            const container = document.getElementById('home-goals-container');
-            const btn = document.getElementById('btn-add-goal-home');
-            if(!container || !btn) return;
-            container.querySelectorAll('.goal-card-item').forEach(g => g.remove());
+            const cont = document.getElementById('home-goals-container'), btn = document.getElementById('btn-add-goal-home'); if(!cont) return;
+            cont.querySelectorAll('.goal-card-item').forEach(e => e.remove());
             state.goals.forEach(g => {
-                const pct = Math.min(100, Math.round((g.current/g.target)*100));
-                const html = `<div class="goal-card-item w-[75vw] max-w-[260px] bg-surface-container-lowest p-6 rounded-[2.5rem] border border-outline-variant/10 shrink-0 shadow-sm active:scale-[0.98] transition-all"><div class="flex justify-between items-start mb-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-2xl bg-tertiary/10 flex items-center justify-center text-tertiary shrink-0"><span class="material-symbols-outlined text-[24px]">${g.icon}</span></div><h4 class="font-headline font-bold text-sm text-primary truncate">${g.name}</h4></div><span class="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-lg">${pct}%</span></div><div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden mb-2.5"><div class="h-full bg-primary transition-all duration-1000" style="width:${pct}%"></div></div><p class="text-[10px] font-bold text-on-surface-variant text-right tracking-tighter">฿ ${g.current.toLocaleString()} / ${g.target.toLocaleString()}</p></div>`;
-                btn.insertAdjacentHTML('beforebegin', html);
+                const pct = Math.round((g.current/g.target)*100) || 0;
+                btn.insertAdjacentHTML('beforebegin', `<div onclick="openGoalDepositModal(${g.id})" class="goal-card-item shrink-0 w-[180px] bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm active:scale-95 transition-all flex flex-col justify-between min-h-[100px] hover:border-primary/50"><div class="flex justify-between items-start"><span class="material-symbols-outlined text-sm text-tertiary">${g.icon}</span><span class="text-[9px] font-black text-primary bg-primary/10 px-1.5 py-0.5 rounded">${pct}%</span></div><h4 class="text-[11px] font-bold text-primary truncate mt-2">${g.name}</h4><div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden mt-1"><div class="h-full bg-primary" style="width:${Math.min(100, pct)}%"></div></div></div>`);
             });
         }
 
-        function renderHeatmap() {
-            const map = document.getElementById('density-map');
-            if(!map) return;
-            map.innerHTML = Array.from({length: 21}).map(() => `<div class="w-6 h-6 rounded-md bg-primary opacity-${[10, 20, 40, 60, 80, 100][Math.floor(Math.random() * 6)]}"></div>`).join('');
+        function renderBills() {
+            const list = document.getElementById('bills-list'); if(!list) return;
+            list.innerHTML = state.bills.length ? state.bills.map(b => `<div class="flex items-center justify-between p-3 bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-sm"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-sm opacity-40 text-primary">receipt</span><div><p class="text-[11px] font-bold text-primary leading-tight">${b.name}</p><p class="text-[8px] text-error font-bold italic">จ่ายวันที่ ${b.dueDate}</p></div></div><div class="flex items-center gap-2"><span class="text-xs font-black text-primary">฿${b.amount.toLocaleString()}</span><button onclick="payBill(${b.id})" class="bg-primary text-white px-3 py-1 rounded-lg text-[9px] font-bold active:scale-95 shadow-md shadow-primary/20">จ่าย</button></div></div>`).join('') : `<p class="text-center text-xs opacity-40 py-4">ไม่มีรายการบิลประจำ</p>`;
         }
 
-        // --- 5. Modal Logic ---
-        function clearBankSelection() {
-            document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('ring-2', 'ring-primary', 'bg-primary/5'));
-            ['new-account-name', 'new-account-balance', 'new-account-reserve-pct'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value=''; });
-            const hint = document.getElementById('reserve-hint');
-            if(hint) hint.classList.add('hidden');
+        function renderAnalyticsChart(history) {
+            const cont = document.getElementById('analytics-chart-container'), leg = document.getElementById('analytics-legend-list'); if(!cont || !leg) return;
+            const exp = history.filter(h => h.type === 'expense'); 
+            if(!exp.length) { cont.innerHTML = `<p class="text-[10px] opacity-40 text-center">ไม่มีข้อมูลใช้จ่าย</p>`; leg.innerHTML=''; return; }
+            const sums = {}; exp.forEach(h => sums[h.title] = (sums[h.title]||0) + h.amount);
+            const sorted = Object.keys(sums).map(k => ({n: k, v: sums[k], c: transCats.expense.find(x => x.n === k)?.c || '#888'})).sort((a,b) => b.v - a.v);
+            let total = exp.reduce((s, h) => s + h.amount, 0), dash = 0, svg = `<svg viewBox="0 0 36 36" class="circular-chart w-full h-full -rotate-90"><path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />`;
+            sorted.forEach(s => { const p = (s.v/total)*100; svg += `<path class="circle" stroke="${s.c}" stroke-dasharray="${p}, 100" stroke-dashoffset="-${dash}" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />`; dash += p; });
+            cont.innerHTML = svg + `</svg><div class="absolute inset-0 flex flex-col items-center justify-center"><p class="text-[8px] font-bold uppercase opacity-30">จ่ายรวม</p><p class="text-[11px] font-black text-primary">฿${total.toLocaleString()}</p></div>`;
+            leg.innerHTML = sorted.slice(0, 4).map(s => `<div class="flex items-center gap-2 p-2 bg-surface-container-low rounded-xl text-[10px] font-bold"><span class="w-2 h-2 rounded-full" style="background:${s.c}"></span><p class="flex-1 truncate">${s.n}</p><p>฿${s.v.toLocaleString()}</p></div>`).join('');
         }
 
-        function openAddAccountModal() { openModal('modal-add-account'); clearBankSelection(); }
-        function selectBank(btn, n, i, c) {
-            document.querySelectorAll('.provider-btn').forEach(b => b.classList.remove('ring-2', 'ring-primary', 'bg-primary/5'));
-            btn.classList.add('ring-2', 'ring-primary', 'bg-primary/5');
-            const input = document.getElementById('new-account-name');
-            if(input) input.value = n;
-            btn.dataset.icon = i; btn.dataset.color = c;
-        }
-
-        function selectAccountType(btn, t) {
-            btn.parentElement.querySelectorAll('button').forEach(b => { b.className="p-3 rounded-2xl border-2 border-transparent bg-surface-container text-on-surface-variant text-xs font-bold transition-all"; b.classList.remove('ring-primary'); });
-            btn.className = "p-3 rounded-2xl border-2 border-primary bg-primary/5 text-primary text-xs font-bold ring-primary transition-all";
-            calculateReserveHint();
-        }
-
-        function calculateReserveHint() {
-            const b = parseFloat(document.getElementById('new-account-balance')?.value) || 0;
-            const p = parseFloat(document.getElementById('new-account-reserve-pct')?.value) || 0;
-            const h = document.getElementById('reserve-hint');
-            if(b > 0 && p > 0) { setText('hint-available', `฿ ${(b-(b*(p/100))).toLocaleString()}`); setText('hint-reserved', `฿ ${(b*(p/100)).toLocaleString()}`); h?.classList.remove('hidden'); } else h?.classList.add('hidden');
-        }
-
-        function saveAddAccount() {
-            const n = document.getElementById('new-account-name')?.value;
-            const b = parseFloat(document.getElementById('new-account-balance')?.value);
-            const p = parseFloat(document.getElementById('new-account-reserve-pct')?.value) || 0;
-            const t = document.querySelector('#account-type-grid button.ring-primary')?.innerText.includes('บัตร') ? 'card' : 'bank';
-            const bank = document.querySelector('.provider-btn.ring-primary');
-            if(!n || isNaN(b)) return showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
-            state.accounts.push({ id: Date.now(), name: n, balance: b, reserve: p, icon: bank?.dataset.icon || 'account_balance', color: bank?.dataset.color || '#444', type: t });
-            saveData();
-            closeModal('modal-add-account'); refreshUI(); showToast('เพิ่มบัญชีสำเร็จ', 'account_balance');
-        }
-
-        function openAddGoalModal() {
-            const list = document.getElementById('goal-account-list');
-            if(list) {
-                list.innerHTML = state.accounts.filter(a => a.type==='bank').map((a, i) => `<button onclick="selectGoalAccount(this, ${a.id})" class="px-5 py-2.5 rounded-full ${i===0?'bg-primary text-white ring-2 ring-primary ring-offset-2':'bg-surface-container text-on-surface-variant'} text-xs font-bold whitespace-nowrap shrink-0 transition-all">${a.name}</button>`).join('');
-                if(list.children[0]) list.children[0].dataset.id = state.accounts.filter(a => a.type==='bank')[0]?.id;
-            }
-            openModal('modal-add-goal');
-        }
-        function selectGoalIcon(btn) { btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('ring-2', 'ring-primary', 'bg-primary/5')); btn.classList.add('ring-2', 'ring-primary', 'bg-primary/5'); }
-        function selectGoalAccount(btn, id) { btn.parentElement.querySelectorAll('button').forEach(b => b.className="px-5 py-2.5 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold whitespace-nowrap shrink-0 transition-all"); btn.className="px-5 py-2.5 rounded-full bg-primary text-white text-xs font-bold whitespace-nowrap ring-2 ring-primary ring-offset-2 shrink-0 transition-all"; btn.dataset.id = id; }
-        
-        function saveAddGoal() {
-            const n = document.getElementById('new-goal-name')?.value;
-            const t = parseFloat(document.getElementById('new-goal-target')?.value);
-            const iconBtn = document.querySelector('#goal-icon-grid button.ring-primary span');
-            const accBtn = document.querySelector('#goal-account-list button.ring-primary');
-            if(!n || isNaN(t)) return showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
-            state.goals.push({ id: Date.now(), name: n, target: t, current: 0, icon: iconBtn ? iconBtn.innerText : 'stars', accountId: accBtn ? accBtn.dataset.id : null });
-            saveData();
-            closeModal('modal-add-goal'); refreshUI(); showToast('สร้างเป้าหมายสำเร็จ', 'stars');
-        }
-
-        function openViewAllGoalsModal() {
-            const list = document.getElementById('all-goals-list');
-            if(list) list.innerHTML = state.goals.map(g => `<div class="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/10 shadow-sm"><div class="flex justify-between items-start mb-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0"><span class="material-symbols-outlined">${g.icon}</span></div><h4 class="font-headline font-bold text-primary">${g.name}</h4></div><span class="text-xs font-bold text-primary">${Math.min(100, Math.round((g.current/g.target)*100))}%</span></div><div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden mb-2"><div class="h-full bg-primary transition-all duration-1000" style="width:${Math.min(100, Math.round((g.current/g.target)*100))}%"></div></div><p class="text-[10px] text-right font-bold opacity-40 uppercase tracking-tighter">฿ ${g.current.toLocaleString()} / ${g.target.toLocaleString()}</p></div>`).join('');
-            openModal('modal-view-all-goals');
-        }
-
-        function openTransactionModal(type) {
-            setTransactionType(type);
-            const list = document.getElementById('trans-account-list');
-            if(list) {
-                list.innerHTML = state.accounts.map((a, i) => `<button onclick="selectTransAccount(this, ${a.id})" class="px-6 py-2.5 rounded-full ${i===0?'bg-primary text-white ring-2 ring-primary ring-offset-2':'bg-surface-container text-on-surface-variant'} text-xs font-bold whitespace-nowrap transition-all shrink-0">${a.name}</button>`).join('');
-                if(list.children[0]) list.children[0].dataset.id = state.accounts[0].id;
-            }
-            openModal('modal-transaction');
-        }
-        function setTransactionType(type) {
-            const isE = type === 'expense';
-            const btnE = document.getElementById('btn-type-expense');
-            const btnI = document.getElementById('btn-type-income');
-            const input = document.getElementById('amount-input');
-            const symbol = document.getElementById('currency-symbol');
-            const grid = document.getElementById('cat-grid');
-            if(!btnE || !btnI || !input || !grid) return;
-            btnE.className = isE ? "px-10 py-3 rounded-full font-bold text-sm bg-white text-error shadow-sm transition-all" : "px-10 py-3 text-sm font-bold opacity-50";
-            btnI.className = !isE ? "px-10 py-3 rounded-full font-bold text-sm bg-white text-secondary shadow-sm transition-all" : "px-10 py-3 text-sm font-bold opacity-50";
-            input.classList.remove('text-error', 'text-secondary'); input.classList.add(isE ? 'text-error' : 'text-secondary');
-            if(symbol) { symbol.classList.remove('text-error', 'text-secondary'); symbol.classList.add(isE ? 'text-error' : 'text-secondary'); }
-            grid.innerHTML = transCats[type].map(c => `<button onclick="selectCategory(this, '${c.n}', '${c.i}')" class="flex flex-col items-center gap-2 p-2.5 rounded-2xl bg-surface-container-low active:scale-95 transition-all"><div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-on-surface-variant shadow-sm shrink-0"><span class="material-symbols-outlined text-lg">${c.i}</span></div><span class="text-[9px] font-bold uppercase tracking-tight">${c.n}</span></button>`).join('');
-        }
-        function selectCategory(btn, n, i) { btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('ring-2', 'ring-primary', 'bg-primary/5')); btn.classList.add('ring-2', 'ring-primary', 'bg-primary/5'); btn.dataset.name = n; btn.dataset.icon = i; }
-        function selectTransAccount(btn, id) { btn.parentElement.querySelectorAll('button').forEach(b => b.className="px-6 py-2.5 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold whitespace-nowrap shrink-0 transition-all"); btn.className="px-6 py-2.5 rounded-full bg-primary text-white text-xs font-bold whitespace-nowrap ring-2 ring-primary ring-offset-2 shrink-0 transition-all"; btn.dataset.id = id; }
-
-        function saveTransaction() {
-            const amt = parseFloat(document.getElementById('amount-input')?.value);
-            const cat = document.querySelector('#cat-grid button.ring-primary');
-            const accBtn = document.querySelector('#trans-account-list button.ring-primary');
-            if(isNaN(amt) || !cat || !accBtn) return showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
-            const acc = state.accounts.find(a => a.id == accBtn.dataset.id);
-            const type = document.getElementById('btn-type-expense').classList.contains('bg-white') ? 'expense' : 'income';
-            if(acc) {
-                acc.balance += (type === 'income' ? amt : -amt);
-                state.history.push({ title: cat.dataset.name, amount: amt, type, accountName: acc.name, icon: cat.dataset.icon });
-                if(type === 'expense') { const b = state.budgets.find(x => x.name === cat.dataset.name); if(b) b.spent += amt; }
-                saveData();
-                closeModal('modal-transaction'); refreshUI(); showToast('บันทึกรายการสำเร็จ', 'check_circle');
-            }
-        }
-        function closeTransactionModal() { closeModal('modal-transaction'); if(document.getElementById('amount-input')) document.getElementById('amount-input').value = ''; }
-
-        function openEditBudgetModal(n, l) { setText('edit-budget-title', `ตั้งงบ: ${n}`); const i = document.getElementById('budget-amount-input'); if(i) { i.value = l; i.dataset.name = n; } openModal('modal-edit-budget'); }
-        function saveEditBudget() {
-            const n = document.getElementById('budget-amount-input')?.dataset.name;
-            const v = parseFloat(document.getElementById('budget-amount-input')?.value);
-            const b = state.budgets.find(x => x.name === n);
-            if(b && !isNaN(v)) { b.limit = v; saveData(); closeModal('modal-edit-budget'); refreshUI(); showToast('ปรับงบประมาณแล้ว', 'done_all'); }
-        }
-
-        function toggleAnalytics(btn, type) {
-            btn.parentElement.querySelectorAll('button').forEach(b => b.className = "px-6 py-2 text-on-surface-variant font-medium text-xs opacity-60 transition-all rounded-full");
-            btn.className = "px-6 py-2 bg-white rounded-full text-primary font-bold shadow-sm text-xs transition-all";
-            showToast(`สลับข้อมูลเรียบร้อย`);
-        }
-
-        window.onload = refreshUI;
+        window.onload = () => switchTab('home');
     </script>
 </body>
 </html>
