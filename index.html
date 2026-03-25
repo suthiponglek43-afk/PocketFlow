@@ -2,11 +2,16 @@
 <html lang="th" class="light">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-    <meta name="theme-color" content="#fcf9f8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
+    <meta name="theme-color" content="#000666" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PocketFlow" />
     <title>PocketFlow</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"PocketFlow Finance","short_name":"PocketFlow","start_url":".","display":"standalone","background_color":"#fcf9f8","theme_color":"#000666","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/10149/10149458.png","sizes":"512x512","type":"image/png"}]}' />
+
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -32,7 +37,7 @@
       .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
       .hide-scrollbar::-webkit-scrollbar { display: none; }
       .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      body { min-height: 100dvh; overflow-x: hidden; background: #fcf9f8; }
+      body { min-height: 100dvh; overflow-x: hidden; background: #fcf9f8; padding-top: env(safe-area-inset-top); }
       .glass-header { background: rgba(252, 249, 248, 0.8); backdrop-filter: blur(24px); }
       .view-section { display: none; opacity: 0; transform: translateY(10px); transition: all 0.3s ease-in-out; }
       .view-section.active { display: block; opacity: 1; transform: translateY(0); }
@@ -44,7 +49,7 @@
       #toast { transition: transform 0.3s ease, opacity 0.3s ease; left: 50%; transform: translateX(-50%); z-index: 100; }
       .toast-hidden { bottom: -100px; opacity: 0; }
       .toast-visible { bottom: 100px; opacity: 1; }
-      .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+      .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 1rem); }
       
       .circular-chart { display: block; margin: 0 auto; max-width: 80%; max-height: 250px; }
       .circle-bg { fill: none; stroke: #f0edec; stroke-width: 3.8; }
@@ -65,6 +70,9 @@
                 <h1 id="header-title" class="font-headline font-extrabold text-primary text-xl md:text-2xl tracking-tight">PocketFlow</h1>
             </div>
             <div class="flex items-center gap-2">
+                <div id="offline-indicator" class="hidden flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-[8px] font-bold uppercase">
+                    <span class="material-symbols-outlined text-[10px]">cloud_off</span> Offline
+                </div>
                 <button onclick="showToast('ไม่มีการแจ้งเตือนใหม่', 'notifications')" class="p-2 rounded-full hover:bg-surface-container active:scale-95 transition-all shrink-0">
                     <span class="material-symbols-outlined text-primary text-2xl">notifications</span>
                 </button>
@@ -187,16 +195,13 @@
 
         <div class="p-5 rounded-3xl bg-surface-container-lowest border border-outline-variant/20 shadow-sm space-y-6">
             <h3 class="font-headline font-bold text-sm text-primary flex items-center gap-2"><span class="material-symbols-outlined text-primary text-lg">bar_chart</span> เปรียบเทียบรายรับ-รายจ่าย</h3>
-            
             <div class="overflow-x-auto hide-scrollbar pb-4">
                 <div id="analytics-comparison-container" class="flex items-end gap-6 h-64 min-w-max px-4 pb-2 border-b border-surface-variant/20"></div>
             </div>
-            
             <div class="flex justify-center gap-8 text-[10px] font-bold">
                 <div class="flex items-center gap-2"><span class="w-3 h-3 bg-secondary rounded-sm"></span> รายรับ</div>
                 <div class="flex items-center gap-2"><span class="w-3 h-3 bg-error rounded-sm"></span> รายจ่าย</div>
             </div>
-
             <div id="comparison-stats" class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2"></div>
         </div>
 
@@ -209,16 +214,24 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- Emergency Fund Status (Updated Calculation Logic) -->
             <div class="p-5 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/20 space-y-4">
                 <h3 class="font-headline font-bold text-sm text-primary flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-lg">shield_with_heart</span> สถานะเงินสำรอง</h3>
                 <div class="grid grid-cols-2 gap-3 bg-surface-container-low p-3 rounded-xl border border-outline-variant/5">
-                    <div><p class="text-[9px] text-on-surface-variant font-bold uppercase opacity-70">เป้าหมาย (6 เดือน)</p><p id="ana-ef-target" class="font-headline font-bold text-base text-primary mt-0.5">฿ 0</p></div>
-                    <div class="text-right"><p class="text-[9px] text-on-surface-variant font-bold uppercase opacity-70">สะสมปัจจุบัน</p><p id="ana-ef-total" class="font-headline font-bold text-base text-secondary mt-0.5">฿ 0</p></div>
+                    <div>
+                        <p class="text-[8px] text-on-surface-variant font-bold uppercase opacity-70">เป้าหมาย (รายจ่าย x 6)</p>
+                        <p id="ana-ef-target" class="font-headline font-bold text-sm text-primary mt-0.5 truncate">฿ 0</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[8px] text-on-surface-variant font-bold uppercase opacity-70">สะสมปัจจุบัน</p>
+                        <p id="ana-ef-total" class="font-headline font-bold text-sm text-secondary mt-0.5 truncate">฿ 0</p>
+                    </div>
                 </div>
                 <div class="space-y-1.5 px-1">
                     <div class="flex justify-between text-[10px] font-bold"><span class="text-on-surface-variant">ความคืบหน้า</span><span id="ana-ef-pct" class="text-secondary">0%</span></div>
                     <div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden"><div id="ana-ef-bar" class="h-full bg-gradient-to-r from-secondary to-secondary-fixed w-0 transition-all duration-1000"></div></div>
                 </div>
+                <p id="ef-desc" class="text-[9px] text-outline italic leading-tight"></p>
             </div>
             <div class="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 shadow-sm">
                 <h3 class="font-headline font-bold text-sm text-primary mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-primary text-lg">calendar_month</span> ความถี่การทำรายการ</h3>
@@ -263,7 +276,7 @@
         <div id="vault-invest-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8"></div>
     </main>
 
-    <!-- Navigation -->
+    <!-- Bottom Nav -->
     <nav class="fixed bottom-0 left-0 w-full z-30 bg-[#fcf9f8]/95 backdrop-blur-3xl border-t border-surface-variant/20 shadow-[0_-8px_32px_0_rgba(28,27,27,0.06)] pb-safe">
         <div class="max-w-5xl mx-auto flex justify-between items-end px-2 pb-6 h-[88px]">
             <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 flex flex-col items-center justify-center text-primary font-bold transition-all"><span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">home</span><span class="text-[9px] uppercase mt-1.5 font-bold tracking-wider">หน้าหลัก</span></button>
@@ -275,6 +288,11 @@
     </nav>
 
     <!-- Modals -->
+    <div id="toast" class="toast-hidden fixed left-1/2 -translate-x-1/2 bg-on-surface text-surface px-6 py-3 rounded-2xl flex items-center gap-2 shadow-2xl z-50 pointer-events-none">
+        <span id="toast-icon" class="material-symbols-outlined text-xl">info</span>
+        <span id="toast-message" class="text-xs font-bold"></span>
+    </div>
+
     <!-- Transaction Modal -->
     <div id="modal-transaction" class="fixed inset-0 z-50 modal-hidden bg-on-surface/40 backdrop-blur-md flex items-center justify-center p-0 md:p-4 transition-all">
         <input type="hidden" id="edit-transaction-id" value="">
@@ -387,7 +405,7 @@
     <div id="modal-add-bill" class="fixed inset-0 z-50 modal-hidden bg-on-surface/40 backdrop-blur-md flex items-center justify-center p-4 transition-all">
         <div class="modal-content-anim bg-surface w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden">
             <header class="p-5 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
-                <h2 class="font-headline font-bold text-lg text-primary">เพิ่มบิลประจำ</h2>
+                <h2 id="deposit-bill-title" class="font-headline font-bold text-lg text-primary">เพิ่มบิลประจำ</h2>
                 <button onclick="closeModal('modal-add-bill')" class="w-8 h-8 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined text-sm">close</span></button>
             </header>
             <div class="p-6 space-y-4">
@@ -404,7 +422,7 @@
     <!-- Goal Deposit Modal -->
     <div id="modal-goal-deposit" class="fixed inset-0 z-50 modal-hidden bg-on-surface/40 backdrop-blur-md flex items-center justify-center p-4 transition-all">
         <input type="hidden" id="deposit-goal-id" value="">
-        <div class="modal-content-anim bg-surface w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden">
+        <div class="modal-content-anim bg-surface w-full max-sm rounded-3xl shadow-2xl overflow-hidden">
             <header class="p-5 border-b border-outline-variant/10 flex justify-between items-center shrink-0">
                 <h2 id="deposit-goal-title" class="font-headline font-bold text-lg text-primary">ฝากเงินเข้าเป้าหมาย</h2>
                 <button onclick="closeModal('modal-goal-deposit')" class="w-8 h-8 bg-surface-container rounded-full flex items-center justify-center active:scale-90 transition-all"><span class="material-symbols-outlined text-sm">close</span></button>
@@ -418,12 +436,34 @@
     </div>
 
     <script>
+        // --- OFFLINE & PWA LOGIC ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    const CACHE_NAME = 'pocketflow-v2';
+                    const ASSETS = [
+                        '${window.location.href}',
+                        'https://cdn.tailwindcss.com?plugins=forms,container-queries',
+                        'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap',
+                        'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap'
+                    ];
+                    self.addEventListener('install', (e) => e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS))));
+                    self.addEventListener('fetch', (e) => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+                `;
+                const blob = new Blob([swCode], { type: 'text/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+            });
+        }
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        function updateOnlineStatus() {
+            document.getElementById('offline-indicator').classList.toggle('hidden', navigator.onLine);
+        }
+
         // --- DATA STATE ---
         const defaultState = { 
-            accounts: [], 
-            goals: [], 
-            history: [], 
-            bills: [], 
+            accounts: [], goals: [], history: [], bills: [], 
             budgets: [
                 { name: 'อาหาร', icon: 'restaurant', spent: 0, limit: 5000, color: 'error' }, 
                 { name: 'เดินทาง', icon: 'directions_car', spent: 0, limit: 3000, color: 'secondary' }, 
@@ -433,18 +473,12 @@
                 { name: 'บิล/น้ำไฟ', icon: 'receipt_long', spent: 0, limit: 2000, color: 'secondary' }, 
                 { name: 'สุขภาพ', icon: 'medical_services', spent: 0, limit: 1500, color: 'secondary' }, 
                 { name: 'อื่นๆ', icon: 'more_horiz', spent: 0, limit: 1000, color: 'secondary' }
-            ], 
-            homePeriod: 'month' 
+            ], homePeriod: 'month' 
         };
         
         let state = JSON.parse(localStorage.getItem('pocketFlowData')) || defaultState;
         function saveData() { localStorage.setItem('pocketFlowData', JSON.stringify(state)); }
-        function resetData() { 
-            if(confirm('ข้อมูลทั้งหมดจะถูกลบถาวร ต้องการล้างข้อมูลหรือไม่?')) { 
-                localStorage.removeItem('pocketFlowData'); 
-                location.reload(); 
-            } 
-        }
+        function resetData() { if(confirm('ข้อมูลทั้งหมดจะถูกลบถาวร ต้องการล้างข้อมูลหรือไม่?')) { localStorage.removeItem('pocketFlowData'); location.reload(); } }
 
         const transCats = { 
             expense: [{n:'อาหาร', i:'restaurant', c:'#ba1a1a'}, {n:'เดินทาง', i:'directions_car', c:'#006e1c'}, {n:'ที่พัก', i:'home', c:'#000666'}, {n:'ช้อปปิ้ง', i:'shopping_bag', c:'#4c56af'}, {n:'น้ำไฟ', i:'receipt_long', c:'#006e1c'}, {n:'สุขภาพ', i:'medical_services', c:'#006e1c'}, {n:'ลงทุน', i:'trending_up', c:'#000666'}, {n:'ทำบุญ', i:'volunteer_activism', c:'#000666'}], 
@@ -474,7 +508,7 @@
             refreshUI();
         }
 
-        // --- LOGIC FUNCTIONS ---
+        // --- CORE LOGIC ---
         function calculateReserveHint() {
             const bal = parseFloat(document.getElementById('new-account-balance').value || 0), pct = parseFloat(document.getElementById('new-account-reserve-pct').value || 0);
             const res = bal * (pct/100); setText('hint-reserved', `฿ ${res.toLocaleString()}`); setText('hint-available', `฿ ${(bal - res).toLocaleString()}`);
@@ -521,27 +555,21 @@
         }
 
         function openEditTransactionModal(id) {
-            const h = state.history.find(x => x.id === id);
-            if(!h) return;
-            openTransactionModal(h.type, h.amount);
-            setVal('edit-transaction-id', id);
+            const h = state.history.find(x => x.id === id); if(!h) return;
+            openTransactionModal(h.type, h.amount); setVal('edit-transaction-id', id);
             document.getElementById('btn-delete-trans').classList.remove('hidden');
             setText('transaction-modal-title', 'แก้ไขรายการ');
-            setTimeout(() => {
-                const accBtn = document.querySelector(`#trans-account-list button[data-id="${h.accountId}"]`);
-                if(accBtn) selectTransAccount(accBtn, h.accountId);
-            }, 50);
+            setTimeout(() => { const accBtn = document.querySelector(`#trans-account-list button[data-id="${h.accountId}"]`); if(accBtn) selectTransAccount(accBtn, h.accountId); }, 50);
         }
 
         function setTransactionType(type) {
             document.getElementById('trans-type-selector').dataset.type = type;
             ['expense', 'income', 'transfer'].forEach(t => document.getElementById(`btn-type-${t}`).className = `flex-1 px-5 py-2 rounded-lg font-bold text-xs ${t===type?'bg-white text-primary shadow-sm':'text-on-surface-variant'}`);
             const isT = type === 'transfer'; document.getElementById('category-section').classList.toggle('hidden', isT); document.getElementById('transfer-to-section').classList.toggle('hidden', !isT);
-            if(!isT) document.getElementById('cat-grid').innerHTML = transCats[type].map(c => `<button onclick="selectCategory(this, '${c.n}', '${c.i}')" class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-surface-container-low active:scale-95 transition-all"><div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 text-sm"><span class="material-symbols-outlined text-sm">${c.i}</span></div><span class="text-[8px] font-bold uppercase tracking-tight">${c.n}</span></button>`).join('');
+            if(!isT) document.getElementById('cat-grid').innerHTML = transCats[type].map(c => `<button onclick="selectCategory(this, '${c.n}', '${c.i}')" class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-surface-container-low active:scale-95 transition-all text-2xl"><div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 text-sm"><span class="material-symbols-outlined text-sm">${c.i}</span></div><span class="text-[8px] font-bold uppercase tracking-tight">${c.n}</span></button>`).join('');
         }
         
         function selectCategory(btn, n, i) { btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('ring-2', 'ring-primary')); btn.classList.add('ring-2', 'ring-primary'); btn.dataset.name = n; btn.dataset.icon = i; }
-        
         function populateAccountLists() {
             const list = document.getElementById('trans-account-list'), toList = document.getElementById('trans-account-to-list');
             const html = state.accounts.map((a, i) => `<button onclick="selectTransAccount(this, ${a.id})" class="px-4 py-2 rounded-lg ${i===0?'bg-primary text-white ring-2 ring-primary ring-offset-2':'bg-surface-container text-on-surface-variant'} text-[10px] font-bold whitespace-nowrap shrink-0 transition-all" data-id="${a.id}">${a.name}</button>`).join('');
@@ -552,15 +580,10 @@
         function selectTransAccountTo(btn, id) { btn.parentElement.querySelectorAll('button').forEach(b => b.className = "px-4 py-2 rounded-lg bg-surface-container text-on-surface-variant text-[10px] font-bold whitespace-nowrap shrink-0"); btn.className = "px-4 py-2 rounded-lg bg-primary text-white ring-2 ring-primary ring-offset-2 text-[10px] font-bold whitespace-nowrap shrink-0"; }
 
         function reverseTransaction(h) {
-            const acc = state.accounts.find(a => a.id == h.accountId);
-            if(!acc) return;
+            const acc = state.accounts.find(a => a.id == h.accountId); if(!acc) return;
             if(h.type === 'income') acc.balance -= h.amount;
             else if(h.type === 'expense') acc.balance += h.amount;
-            else if(h.type === 'transfer') {
-                acc.balance += h.amount;
-                const toAcc = state.accounts.find(a => a.id == h.toAccountId);
-                if(toAcc) toAcc.balance -= h.amount;
-            }
+            else if(h.type === 'transfer') { acc.balance += h.amount; const toAcc = state.accounts.find(a => a.id == h.toAccountId); if(toAcc) toAcc.balance -= h.amount; }
         }
 
         function deleteTransaction() {
@@ -627,95 +650,86 @@
 
         function changeHomePeriod(period) {
             state.homePeriod = period;
-            ['week', 'month', 'year'].forEach(p => {
-                const btn = document.getElementById(`period-${p}`);
-                if(btn) btn.className = (p === period) ? "px-6 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-primary shadow-sm" : "px-6 py-1.5 rounded-lg text-xs font-bold transition-all text-on-surface-variant";
-            });
+            ['week', 'month', 'year'].forEach(p => { const btn = document.getElementById(`period-${p}`); if(btn) btn.className = (p === period) ? "px-6 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-primary shadow-sm" : "px-6 py-1.5 rounded-lg text-xs font-bold transition-all text-on-surface-variant"; });
             refreshUI();
         }
 
         function getGroupedData(history, period) {
             const groups = [];
-            const now = new Date();
             if (period === 'week') {
                 const days = ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'];
-                days.forEach((label, i) => {
-                    const dayIdx = (i + 1) % 7; 
-                    const filtered = history.filter(h => new Date(h.id).getDay() === dayIdx);
-                    groups.push({ label, inc: filtered.filter(h => h.type === 'income').reduce((s, h) => s + h.amount, 0), exp: filtered.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0) });
-                });
+                days.forEach((label, i) => { const dayIdx = (i + 1) % 7; const filtered = history.filter(h => new Date(h.id).getDay() === dayIdx); groups.push({ label, inc: filtered.filter(h => h.type === 'income').reduce((s, h) => s + h.amount, 0), exp: filtered.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0) }); });
             } else if (period === 'month') {
                 for (let w = 1; w <= 5; w++) {
-                    const filtered = history.filter(h => {
-                        const d = new Date(h.id).getDate();
-                        if (w === 1) return d >= 1 && d <= 7;
-                        if (w === 2) return d >= 8 && d <= 14;
-                        if (w === 3) return d >= 15 && d <= 21;
-                        if (w === 4) return d >= 22 && d <= 28;
-                        return d >= 29;
-                    });
+                    const filtered = history.filter(h => { const d = new Date(h.id).getDate(); if (w === 1) return d >= 1 && d <= 7; if (w === 2) return d >= 8 && d <= 14; if (w === 3) return d >= 15 && d <= 21; if (w === 4) return d >= 22 && d <= 28; return d >= 29; });
                     if (w === 5 && filtered.length === 0) continue;
                     groups.push({ label: `ส.${w}`, inc: filtered.filter(h => h.type === 'income').reduce((s, h) => s + h.amount, 0), exp: filtered.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0) });
                 }
             } else if (period === 'year') {
                 const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-                months.forEach((label, i) => {
-                    const filtered = history.filter(h => new Date(h.id).getMonth() === i);
-                    groups.push({ label, inc: filtered.filter(h => h.type === 'income').reduce((s, h) => s + h.amount, 0), exp: filtered.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0) });
-                });
+                months.forEach((label, i) => { const filtered = history.filter(h => new Date(h.id).getMonth() === i); groups.push({ label, inc: filtered.filter(h => h.type === 'income').reduce((s, h) => s + h.amount, 0), exp: filtered.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0) }); });
             }
             return groups;
         }
 
+        // --- GLOBAL UI REFRESH (Calculation logic updated here) ---
         function refreshUI() {
-            const total = state.accounts.reduce((s, a) => s + (a.type === 'card' ? -a.balance : a.balance), 0);
-            setText('home-total-balance', `฿ ${total.toLocaleString()}`); setText('vault-networth-display', `฿ ${total.toLocaleString()}`);
+            const totalNet = state.accounts.reduce((s, a) => s + (a.type === 'card' ? -a.balance : a.balance), 0);
+            setText('home-total-balance', `฿ ${totalNet.toLocaleString()}`); setText('vault-networth-display', `฿ ${totalNet.toLocaleString()}`);
             const now = new Date();
-            const getFilteredHistory = (period) => state.history.filter(h => {
-                const d = new Date(h.id);
-                if(period === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-                if(period === 'year') return d.getFullYear() === now.getFullYear();
-                if(period === 'week') { const weekAgo = new Date(); weekAgo.setDate(now.getDate() - 7); return d >= weekAgo; }
-                return true;
-            });
+            const getFilteredHistory = (period) => state.history.filter(h => { const d = new Date(h.id); if(period === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); if(period === 'year') return d.getFullYear() === now.getFullYear(); if(period === 'week') { const weekAgo = new Date(); weekAgo.setDate(now.getDate() - 7); return d >= weekAgo; } return true; });
+            
+            // Period summaries
             const wHist = getFilteredHistory('week'), mHist = getFilteredHistory('month'), yHist = getFilteredHistory('year');
             const getNet = (h) => h.reduce((s, x) => s + (x.type==='income'?x.amount:(x.type==='expense'?-x.amount:0)), 0);
-            setText('ana-summary-week', `฿${getNet(wHist).toLocaleString()}`);
-            setText('ana-summary-month', `฿${getNet(mHist).toLocaleString()}`);
-            setText('ana-summary-year', `฿${getNet(yHist).toLocaleString()}`);
+            setText('ana-summary-week', `฿${getNet(wHist).toLocaleString()}`); setText('ana-summary-month', `฿${getNet(mHist).toLocaleString()}`); setText('ana-summary-year', `฿${getNet(yHist).toLocaleString()}`);
+            
+            // Home monthly view
             const homeMonthHistory = getFilteredHistory('month');
+            const actualMonthlyExp = homeMonthHistory.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0);
             setText('home-total-income', `฿ ${homeMonthHistory.filter(h => h.type === 'income').reduce((s, h) => s + h.amount, 0).toLocaleString()}`); 
-            setText('home-total-expense', `฿ ${homeMonthHistory.filter(h => h.type === 'expense').reduce((s, h) => s + h.amount, 0).toLocaleString()}`);
+            setText('home-total-expense', `฿ ${actualMonthlyExp.toLocaleString()}`);
+            
+            // Budget
             const bSpent = state.budgets.reduce((s, b) => s + homeMonthHistory.filter(h => h.title === b.name).reduce((ss, h) => ss + h.amount, 0), 0);
             const bLimit = state.budgets.reduce((s, b) => s + b.limit, 0);
-            const pct = Math.round((bSpent/bLimit)*100) || 0;
+            const pct = Math.round((bSpent/bLimit)*100) || 0; 
             setText('home-budget-pct', `${pct}%`); setText('home-budget-spent', `฿ ${bSpent.toLocaleString()}`); setText('home-budget-limit', `฿ ${bLimit.toLocaleString()}`);
             document.getElementById('home-budget-bar').style.width = `${Math.min(100, pct)}%`;
+            
+            // Analytics logic
             const curHistory = getFilteredHistory(state.homePeriod);
             const grouped = getGroupedData(curHistory, state.homePeriod);
+
+            // --- EMERGENCY FUND LOGIC (NEW: Based on Real Monthly Expenses) ---
             const currentReserve = state.accounts.reduce((s, a) => s + (a.type==='bank' ? a.balance * (a.reserve/100) : 0), 0);
             setText('ana-ef-total', `฿ ${Math.round(currentReserve).toLocaleString()}`);
-            const efTarget = (state.budgets.reduce((s, b) => s + b.limit, 0) + state.bills.reduce((s, b) => s + b.amount, 0)) * 6;
-            setText('ana-ef-target', `฿ ${efTarget.toLocaleString()}`);
-            const efPct = efTarget > 0 ? Math.round((currentReserve / efTarget) * 100) : 0;
+            
+            // Logic: Target = (Real Monthly Expenses + Monthly Bills) * 6 months
+            const monthlyBillsSum = state.bills.reduce((s, b) => s + b.amount, 0);
+            
+            // Use current month's expenses or average? For immediate feedback, use current actual expenses.
+            // Baseline protection: If actual expense is less than 50% of budget, use 75% of budget as safe baseline
+            const baseExp = Math.max(actualMonthlyExp, bLimit * 0.75); 
+            const efTarget = (baseExp + monthlyBillsSum) * 6;
+            
+            setText('ana-ef-target', `฿ ${Math.round(efTarget).toLocaleString()}`);
+            const efPct = efTarget > 0 ? Math.round((currentReserve / efTarget) * 100) : 0; 
             setText('ana-ef-pct', `${efPct}%`);
             const efBar = document.getElementById('ana-ef-bar'); if(efBar) efBar.style.width = `${Math.min(100, efPct)}%`;
-            renderHistory(); renderVaults(); renderBudgets(); renderGoals(); renderBills(); 
-            renderAnalyticsChart(curHistory);
-            renderMultiComparison(grouped);
+            
+            setText('ef-desc', `คำนวณจากรายจ่ายจริงเดือนนี้ (${actualMonthlyExp.toLocaleString()} บ.) และบิลประจำ (${monthlyBillsSum.toLocaleString()} บ.)`);
+
+            renderHistory(); renderVaults(); renderBudgets(); renderGoals(); renderBills(); renderAnalyticsChart(curHistory); renderMultiComparison(grouped);
             const map = document.getElementById('density-map'); if(map) map.innerHTML = Array.from({length: 21}).map(() => `<div class="w-6 h-6 rounded-md bg-primary opacity-${[10, 20, 40, 60, 80, 100][Math.floor(Math.random() * 6)]}"></div>`).join('');
         }
 
         function renderMultiComparison(grouped) {
-            const cont = document.getElementById('analytics-comparison-container'), stats = document.getElementById('comparison-stats'); 
-            if(!cont || !stats) return;
+            const cont = document.getElementById('analytics-comparison-container'), stats = document.getElementById('comparison-stats'); if(!cont || !stats) return;
             const maxVal = Math.max(...grouped.map(g => Math.max(g.inc, g.exp)), 1000);
             cont.innerHTML = grouped.map(g => {
                 const incH = (g.inc / maxVal) * 100, expH = (g.exp / maxVal) * 100;
-                return `<div class="flex flex-col items-center gap-2 group min-w-[60px]"><div class="flex items-end gap-1 h-48">
-                        <div class="w-4 bg-secondary rounded-t-lg bar-animate shadow-sm relative" style="height: ${Math.max(2, incH)}%"><div class="absolute -top-6 left-1/2 -translate-x-1/2 hidden group-hover:block bg-secondary text-white text-[7px] px-1 rounded font-bold">฿${g.inc.toLocaleString()}</div></div>
-                        <div class="w-4 bg-error rounded-t-lg bar-animate shadow-sm relative" style="height: ${Math.max(2, expH)}%"><div class="absolute -top-6 left-1/2 -translate-x-1/2 hidden group-hover:block bg-error text-white text-[7px] px-1 rounded font-bold">฿${g.exp.toLocaleString()}</div></div>
-                    </div><span class="text-[10px] font-bold text-on-surface-variant/60">${g.label}</span></div>`;
+                return `<div class="flex flex-col items-center gap-2 group min-w-[60px]"><div class="flex items-end gap-1 h-48"><div class="w-4 bg-secondary rounded-t-lg bar-animate shadow-sm relative" style="height: ${Math.max(2, incH)}%"><div class="absolute -top-6 left-1/2 -translate-x-1/2 hidden group-hover:block bg-secondary text-white text-[7px] px-1 rounded font-bold">฿${g.inc.toLocaleString()}</div></div><div class="w-4 bg-error rounded-t-lg bar-animate shadow-sm relative" style="height: ${Math.max(2, expH)}%"><div class="absolute -top-6 left-1/2 -translate-x-1/2 hidden group-hover:block bg-error text-white text-[7px] px-1 rounded font-bold">฿${g.exp.toLocaleString()}</div></div></div><span class="text-[10px] font-bold text-on-surface-variant/60">${g.label}</span></div>`;
             }).join('');
             const totalInc = grouped.reduce((s, g) => s + g.inc, 0), totalExp = grouped.reduce((s, g) => s + g.exp, 0);
             stats.innerHTML = `<div class="bg-surface-container-low p-4 rounded-2xl flex justify-between items-center border border-outline-variant/5 shadow-sm"><div><p class="text-[9px] font-bold text-outline uppercase tracking-widest mb-1">กระแสเงินสดช่วงนี้</p><p class="text-xl font-black ${totalInc >= totalExp ? 'text-secondary' : 'text-error'}">฿${(totalInc - totalExp).toLocaleString()}</p></div><div class="w-10 h-10 rounded-full ${totalInc >= totalExp ? 'bg-secondary/10 text-secondary' : 'bg-error/10 text-error'} flex items-center justify-center"><span class="material-symbols-outlined">${totalInc >= totalExp ? 'trending_up' : 'trending_down'}</span></div></div><div class="bg-primary/5 p-4 rounded-2xl flex items-center gap-3"><span class="material-symbols-outlined text-primary text-xl">insights</span><p class="text-[10px] font-medium text-primary-container leading-snug">${totalInc >= totalExp ? 'กระแสเงินสดเป็นบวก! แสดงว่าคุณมีการจัดการเงินที่ดีในช่วงนี้' : 'มีการใช้จ่ายเกินรายรับเล็กน้อยในช่วงเวลานี้ ลองตรวจสอบรายการล่าสุดดูครับ'}</p></div>`;
@@ -728,31 +742,19 @@
         }
 
         function renderVaults() {
-            ['bank', 'travel', 'card', 'invest'].forEach(t => {
-                const grid = document.getElementById(`vault-${t}-grid`); if(!grid) return;
-                const items = state.accounts.filter(a => a.type === t);
-                grid.innerHTML = items.map(a => `<div class="p-5 rounded-2xl shadow-sm card-pattern text-white flex flex-col justify-between min-h-[100px]" style="background:${a.color}"><div class="flex justify-between items-start font-bold text-xs"><span>${a.name}</span><span class="material-symbols-outlined text-sm opacity-60">${a.icon}</span></div><p class="text-2xl font-black">฿ ${a.balance.toLocaleString()}</p></div>`).join('') + `<button onclick="openAddAccountModal('${t}')" class="w-full bg-surface-container-lowest border-2 border-dashed border-outline-variant/30 p-4 rounded-2xl flex flex-col items-center justify-center text-primary group active:scale-95 transition-all hover:bg-primary/5"><span class="material-symbols-outlined group-hover:scale-110 transition-transform">add_card</span><span class="text-[9px] font-bold uppercase mt-1">เพิ่มบัญชี</span></button>`;
-            });
+            ['bank', 'travel', 'card', 'invest'].forEach(t => { const grid = document.getElementById(`vault-${t}-grid`); if(!grid) return; const items = state.accounts.filter(a => a.type === t); grid.innerHTML = items.map(a => `<div class="p-5 rounded-2xl shadow-sm card-pattern text-white flex flex-col justify-between min-h-[100px]" style="background:${a.color}"><div class="flex justify-between items-start font-bold text-xs"><span>${a.name}</span><span class="material-symbols-outlined text-sm opacity-60">${a.icon}</span></div><p class="text-2xl font-black">฿ ${a.balance.toLocaleString()}</p></div>`).join('') + `<button onclick="openAddAccountModal('${t}')" class="w-full bg-surface-container-lowest border-2 border-dashed border-outline-variant/30 p-4 rounded-2xl flex flex-col items-center justify-center text-primary group active:scale-95 transition-all hover:bg-primary/5"><span class="material-symbols-outlined group-hover:scale-110 transition-transform">add_card</span><span class="text-[9px] font-bold uppercase mt-1">เพิ่มบัญชี</span></button>`; });
         }
 
         function renderBudgets() {
             const list = document.getElementById('budget-categories-list'); if(!list) return;
-            const now = new Date();
-            const curMonth = state.history.filter(h => { const d = new Date(h.id); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
-            list.innerHTML = state.budgets.map(b => {
-                const spent = curMonth.filter(h => h.title === b.name).reduce((s, h) => s + h.amount, 0);
-                const pct = Math.min(100, (spent/b.limit)*100) || 0;
-                return `<div onclick="openEditBudgetModal('${b.name}', ${b.limit})" class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm cursor-pointer hover:border-primary/50 transition-all"><div class="flex justify-between items-center mb-2"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-${b.color}">${b.icon}</span><h4 class="text-xs font-bold">${b.name}</h4></div><p class="text-[9px] font-bold text-primary">฿${spent.toLocaleString()} / ฿${b.limit.toLocaleString()}</p></div><div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden"><div class="h-full bg-${b.color}" style="width:${pct}%"></div></div></div>`;
-            }).join('');
+            const now = new Date(); const curMonth = state.history.filter(h => { const d = new Date(h.id); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
+            list.innerHTML = state.budgets.map(b => { const spent = curMonth.filter(h => h.title === b.name).reduce((s, h) => s + h.amount, 0); const pct = Math.min(100, (spent/b.limit)*100) || 0; return `<div onclick="openEditBudgetModal('${b.name}', ${b.limit})" class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm cursor-pointer hover:border-primary/50 transition-all"><div class="flex justify-between items-center mb-2"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-sm text-${b.color}">${b.icon}</span><h4 class="text-xs font-bold">${b.name}</h4></div><p class="text-[9px] font-bold text-primary">฿${spent.toLocaleString()} / ฿${b.limit.toLocaleString()}</p></div><div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden"><div class="h-full bg-${b.color}" style="width:${pct}%"></div></div></div>`; }).join('');
         }
 
         function renderGoals() {
             const cont = document.getElementById('home-goals-container'), btn = document.getElementById('btn-add-goal-home'); if(!cont) return;
             cont.querySelectorAll('.goal-card-item').forEach(e => e.remove());
-            state.goals.forEach(g => {
-                const pct = Math.round((g.current/g.target)*100) || 0;
-                btn.insertAdjacentHTML('beforebegin', `<div onclick="openGoalDepositModal(${g.id})" class="goal-card-item shrink-0 w-[180px] bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm active:scale-95 transition-all flex flex-col justify-between min-h-[100px] hover:border-primary/50"><div class="flex justify-between items-start"><span class="material-symbols-outlined text-sm text-tertiary">${g.icon}</span><span class="text-[9px] font-black text-primary bg-primary/10 px-1.5 py-0.5 rounded">${pct}%</span></div><h4 class="text-[11px] font-bold text-primary truncate mt-2">${g.name}</h4><div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden mt-1"><div class="h-full bg-primary" style="width:${Math.min(100, pct)}%"></div></div></div>`);
-            });
+            state.goals.forEach(g => { const pct = Math.round((g.current/g.target)*100) || 0; btn.insertAdjacentHTML('beforebegin', `<div onclick="openGoalDepositModal(${g.id})" class="goal-card-item shrink-0 w-[180px] bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm active:scale-95 transition-all flex flex-col justify-between min-h-[100px] hover:border-primary/50"><div class="flex justify-between items-start"><span class="material-symbols-outlined text-sm text-tertiary">${g.icon}</span><span class="text-[9px] font-black text-primary bg-primary/10 px-1.5 py-0.5 rounded">${pct}%</span></div><h4 class="text-[11px] font-bold text-primary truncate mt-2">${g.name}</h4><div class="w-full h-1 bg-surface-container-high rounded-full overflow-hidden mt-1"><div class="h-full bg-primary" style="width:${Math.min(100, pct)}%"></div></div></div>`); });
         }
 
         function renderBills() {
@@ -762,8 +764,7 @@
 
         function renderAnalyticsChart(history) {
             const cont = document.getElementById('analytics-chart-container'), leg = document.getElementById('analytics-legend-list'); if(!cont || !leg) return;
-            const exp = history.filter(h => h.type === 'expense'); 
-            if(!exp.length) { cont.innerHTML = `<p class="text-[10px] opacity-40 text-center">ไม่มีข้อมูลใช้จ่าย</p>`; leg.innerHTML=''; return; }
+            const exp = history.filter(h => h.type === 'expense'); if(!exp.length) { cont.innerHTML = `<p class="text-[10px] opacity-40 text-center">ไม่มีข้อมูลใช้จ่าย</p>`; leg.innerHTML=''; return; }
             const sums = {}; exp.forEach(h => sums[h.title] = (sums[h.title]||0) + h.amount);
             const sorted = Object.keys(sums).map(k => ({n: k, v: sums[k], c: transCats.expense.find(x => x.n === k)?.c || '#888'})).sort((a,b) => b.v - a.v);
             let total = exp.reduce((s, h) => s + h.amount, 0), dash = 0, svg = `<svg viewBox="0 0 36 36" class="circular-chart w-full h-full -rotate-90"><path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />`;
@@ -772,7 +773,7 @@
             leg.innerHTML = sorted.slice(0, 4).map(s => `<div class="flex items-center gap-2 p-2 bg-surface-container-low rounded-xl text-[10px] font-bold"><span class="w-2 h-2 rounded-full" style="background:${s.c}"></span><p class="flex-1 truncate">${s.n}</p><p>฿${s.v.toLocaleString()}</p></div>`).join('');
         }
 
-        window.onload = () => switchTab('home');
+        window.onload = () => { switchTab('home'); updateOnlineStatus(); };
     </script>
 </body>
 </html>
